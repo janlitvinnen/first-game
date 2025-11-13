@@ -38,7 +38,7 @@ scene("gameover", () => {
 scene("victory", (data) => {
   const currentLevel = data.currentLevel || 1;
   const nextLevel = currentLevel + 1;
-  const hasNextLevel = nextLevel <= 4; // Aktuell 4 Levels (mit Boss!)
+  const hasNextLevel = nextLevel <= 6; // Aktuell 6 Levels!
   
   add([
     text("LEVEL GESCHAFFT!", { size: 48 }),
@@ -90,6 +90,12 @@ scene("victory", (data) => {
     } else if (nextLevel === 4) {
       levelInfo = "⚠️ BOSS-KAMPF! 50 ♥ ⚠️";
       infoColor = rgb(255, 50, 50); // Rot für Boss!
+    } else if (nextLevel === 5) {
+      levelInfo = "2 Super-Zombies mit je 25 ♥";
+      infoColor = rgb(255, 100, 100);
+    } else if (nextLevel === 6) {
+      levelInfo = "5 Starke Zombies mit je 40 ♥";
+      infoColor = rgb(255, 80, 80);
     }
     
     add([
@@ -100,57 +106,558 @@ scene("victory", (data) => {
     ]);
     
     onKeyPress("enter", () => {
-      go("game", {
-        level: nextLevel,
-        playerHealth: data.playerHealth,
-        goldenApples: data.goldenApples
-      });
+      // Wenn Level 5 oder 6 kommt, gehe zum Shop
+      if (nextLevel === 5) {
+        go("shop", {
+          level: nextLevel,
+          playerHealth: data.playerHealth,
+          goldenApples: data.goldenApples,
+          coins: data.coins || 0,
+          hasShield: data.hasShield || false,
+          hasDiamondSword: data.hasDiamondSword || false,
+          hasNetheriteSword: data.hasNetheriteSword || false,
+          hasIronArmor: data.hasIronArmor || false
+        });
+      } else if (nextLevel === 6) {
+        // 100 Münzen nach Level 5!
+        go("coinreward", {
+          level: nextLevel,
+          playerHealth: data.playerHealth,
+          goldenApples: data.goldenApples,
+          coins: (data.coins || 0) + 100,
+          hasShield: data.hasShield || false,
+          hasDiamondSword: data.hasDiamondSword || false,
+          hasNetheriteSword: data.hasNetheriteSword || false,
+          hasIronArmor: data.hasIronArmor || false
+        });
+      } else {
+        go("game", {
+          level: nextLevel,
+          playerHealth: data.playerHealth,
+          goldenApples: data.goldenApples,
+          coins: data.coins || 0,
+          hasShield: data.hasShield || false,
+          hasDiamondSword: data.hasDiamondSword || false,
+          hasNetheriteSword: data.hasNetheriteSword || false,
+          hasIronArmor: data.hasIronArmor || false
+        });
+      }
     });
   } else {
-    // Spiel gewonnen!
+    // Boss besiegt - Schild-Belohnung!
+    if (currentLevel === 4) {
+      add([
+        text("🏆 BOSS BESIEGT! 🏆", { size: 48 }),
+        pos(width() / 2, height() / 2 - 60),
+        color(255, 215, 0),
+        anchor("center")
+      ]);
+      
+      add([
+        text("🛡️ SCHILD ERHALTEN! 🛡️", { size: 36 }),
+        pos(width() / 2, height() / 2 + 10),
+        color(100, 200, 255),
+        anchor("center")
+      ]);
+      
+      add([
+        text("Drücke SHIFT um dich zu schützen!", { size: 20 }),
+        pos(width() / 2, height() / 2 + 50),
+        color(200, 200, 200),
+        anchor("center")
+      ]);
+      
+      add([
+        text(`Leben: ${Math.ceil(data.playerHealth)} ♥  |  Äpfel: ${data.goldenApples} 🍎`, { size: 18 }),
+        pos(width() / 2, height() / 2 + 90),
+        color(255, 255, 255),
+        anchor("center")
+      ]);
+      
+      add([
+        text("Drücke ENTER für Level 5", { size: 24 }),
+        pos(width() / 2, height() / 2 + 140),
+        color(100, 255, 100),
+        anchor("center")
+      ]);
+      
+      onKeyPress("enter", () => {
+        go("shop", {
+          level: nextLevel,
+          playerHealth: data.playerHealth,
+          goldenApples: data.goldenApples,
+          hasShield: true,
+          hasDiamondSword: false
+        });
+      });
+    } else {
+      // Spiel komplett gewonnen!
+      add([
+        text("🎉 SPIEL GEWONNEN! 🎉", { size: 48 }),
+        pos(width() / 2, height() / 2 + 90),
+        color(255, 215, 0),
+        anchor("center")
+      ]);
+      
+      add([
+        text("Du hast alle Levels geschafft!", { size: 28 }),
+        pos(width() / 2, height() / 2 + 140),
+        color(100, 255, 100),
+        anchor("center")
+      ]);
+      
+      add([
+        text("Drücke ENTER zum Neustart", { size: 20 }),
+        pos(width() / 2, height() / 2 + 180),
+        color(200, 200, 200),
+        anchor("center")
+      ]);
+      
+      onKeyPress("enter", () => {
+        go("game", { level: 1 });
+      });
+    }
+  }
+});
+
+// Münz-Belohnungs-Szene
+scene("coinreward", (data) => {
+  // Hintergrund
+  add([
+    rect(width(), height()),
+    pos(0, 0),
+    color(20, 30, 80),
+    z(-1)
+  ]);
+  
+  add([
+    text("🎉 BELOHNUNG! 🎉", { size: 48 }),
+    pos(width() / 2, height() / 2 - 80),
+    color(255, 215, 0),
+    anchor("center")
+  ]);
+  
+  add([
+    text("Du hast 100 Münzen erhalten!", { size: 32 }),
+    pos(width() / 2, height() / 2 - 10),
+    color(255, 255, 100),
+    anchor("center")
+  ]);
+  
+  add([
+    text("💰", { size: 64 }),
+    pos(width() / 2, height() / 2 + 50),
+    color(255, 215, 0),
+    anchor("center")
+  ]);
+  
+  add([
+    text(`Münzen: ${data.coins} 💰`, { size: 28 }),
+    pos(width() / 2, height() / 2 + 120),
+    color(255, 255, 255),
+    anchor("center")
+  ]);
+  
+  add([
+    text("Drücke ENTER für den LADEN", { size: 24 }),
+    pos(width() / 2, height() - 80),
+    color(100, 255, 100),
+    anchor("center")
+  ]);
+  
+  onKeyPress("enter", () => {
+    go("shop", data);
+  });
+});
+
+// Shop-Szene
+scene("shop", (data) => {
+  // Shop-Hintergrund (dunkelblau)
+  add([
+    rect(width(), height()),
+    pos(0, 0),
+    color(20, 30, 80),
+    z(-1)
+  ]);
+  
+  add([
+    text("🏪 LADEN 🏪", { size: 48 }),
+    pos(width() / 2, 40),
+    color(255, 215, 0),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  // Währungsanzeige
+  const hasCoins = (data.coins || 0) > 0;
+  if (hasCoins) {
     add([
-      text("🏆 BOSS BESIEGT! 🏆", { size: 48 }),
-      pos(width() / 2, height() / 2 + 90),
-      color(255, 215, 0),
-      anchor("center")
+      text(`Münzen: ${data.coins} 💰  |  Äpfel: ${data.goldenApples} 🍎`, { size: 20 }),
+      pos(width() / 2, 90),
+      color(255, 255, 255),
+      anchor("center"),
+      z(10)
+    ]);
+  } else {
+    add([
+      text(`Goldene Äpfel: ${data.goldenApples} 🍎`, { size: 22 }),
+      pos(width() / 2, 90),
+      color(255, 255, 255),
+      anchor("center"),
+      z(10)
+    ]);
+  }
+  
+  let currentCoins = data.coins || 0;
+  let currentApples = data.goldenApples;
+  let boughtDiamond = data.hasDiamondSword;
+  let boughtNetherite = data.hasNetheriteSword;
+  let boughtArmor = data.hasIronArmor;
+  
+  // Shop-Items (verschiedene basierend auf Münzen)
+  if (!hasCoins) {
+    // Diamantschwert-Shop (nur Äpfel)
+    const diamondPrice = 3;
+    const canBuy = currentApples >= diamondPrice && !boughtDiamond;
+    
+    add([
+      rect(450, 220),
+      pos(width() / 2, height() / 2 + 10),
+      color(60, 60, 100),
+      outline(4, canBuy ? rgb(100, 255, 100) : rgb(100, 100, 100)),
+      anchor("center"),
+      z(5)
     ]);
     
     add([
-      text("DU HAST DAS SPIEL GEWONNEN!", { size: 28 }),
-      pos(width() / 2, height() / 2 + 140),
-      color(100, 255, 100),
-      anchor("center")
+      text("💎 DIAMANTSCHWERT", { size: 32 }),
+      pos(width() / 2, height() / 2 - 70),
+      color(100, 200, 255),
+      anchor("center"),
+      z(10)
     ]);
     
     add([
-      text("Drücke ENTER zum Neustart", { size: 20 }),
-      pos(width() / 2, height() / 2 + 180),
+      text("Macht 6 Herzen Schaden!", { size: 18 }),
+      pos(width() / 2, height() / 2 - 30),
       color(200, 200, 200),
-      anchor("center")
+      anchor("center"),
+      z(10)
     ]);
     
-    onKeyPress("enter", () => {
-      go("game", { level: 1 });
+    add([
+      text(`Preis: ${diamondPrice} 🍎`, { size: 24 }),
+      pos(width() / 2, height() / 2 + 10),
+      color(255, 215, 0),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    if (boughtDiamond) {
+      add([
+        text("✓ BEREITS GEKAUFT", { size: 20 }),
+        pos(width() / 2, height() / 2 + 60),
+        color(100, 255, 100),
+        anchor("center"),
+        z(10)
+      ]);
+    } else if (canBuy) {
+      add([
+        text("Drücke K zum KAUFEN", { size: 22 }),
+        pos(width() / 2, height() / 2 + 60),
+        color(100, 255, 100),
+        anchor("center"),
+        z(10),
+        "buy-hint"
+      ]);
+    } else {
+      add([
+        text("❌ NICHT GENUG ÄPFEL", { size: 20 }),
+        pos(width() / 2, height() / 2 + 60),
+        color(255, 100, 100),
+        anchor("center"),
+        z(10)
+      ]);
+    }
+    
+    onKeyPress("k", () => {
+      if (!boughtDiamond && currentApples >= diamondPrice) {
+        boughtDiamond = true;
+        currentApples -= diamondPrice;
+        
+        destroyAll("buy-hint");
+        add([
+          text("✓ GEKAUFT! Drücke ENTER...", { size: 22 }),
+          pos(width() / 2, height() / 2 + 60),
+          color(100, 255, 100),
+          anchor("center"),
+          z(10)
+        ]);
+      }
+    });
+  } else {
+    // Münz-Shop mit 3 Items
+    // Item 1: Netherite-Schwert
+    add([
+      rect(350, 180),
+      pos(width() / 2 - 400, height() / 2),
+      color(60, 60, 100),
+      outline(3, currentCoins >= 20 && !boughtNetherite ? rgb(100, 255, 100) : rgb(100, 100, 100)),
+      anchor("center"),
+      z(5)
+    ]);
+    
+    add([
+      text("🔥 NETHERITE-SCHWERT", { size: 20 }),
+      pos(width() / 2 - 400, height() / 2 - 60),
+      color(200, 50, 50),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    add([
+      text("10 Herzen Schaden!", { size: 16 }),
+      pos(width() / 2 - 400, height() / 2 - 25),
+      color(200, 200, 200),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    add([
+      text("20 💰", { size: 20 }),
+      pos(width() / 2 - 400, height() / 2 + 10),
+      color(255, 215, 0),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    if (boughtNetherite) {
+      add([
+        text("✓ GEKAUFT", { size: 16 }),
+        pos(width() / 2 - 400, height() / 2 + 50),
+        color(100, 255, 100),
+        anchor("center"),
+        z(10)
+      ]);
+    } else {
+      add([
+        text(currentCoins >= 20 ? "[1] KAUFEN" : "ZU TEUER", { size: 16 }),
+        pos(width() / 2 - 400, height() / 2 + 50),
+        color(currentCoins >= 20 ? rgb(100, 255, 100) : rgb(255, 100, 100)),
+        anchor("center"),
+        z(10),
+        "hint1"
+      ]);
+    }
+    
+    // Item 2: Goldener Apfel
+    add([
+      rect(350, 180),
+      pos(width() / 2, height() / 2),
+      color(60, 60, 100),
+      outline(3, currentCoins >= 5 ? rgb(100, 255, 100) : rgb(100, 100, 100)),
+      anchor("center"),
+      z(5)
+    ]);
+    
+    add([
+      text("🍎 GOLDENER APFEL", { size: 20 }),
+      pos(width() / 2, height() / 2 - 60),
+      color(255, 215, 0),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    add([
+      text("Heilt 2 Herzen", { size: 16 }),
+      pos(width() / 2, height() / 2 - 25),
+      color(200, 200, 200),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    add([
+      text("5 💰 (mehrfach kaufbar)", { size: 16 }),
+      pos(width() / 2, height() / 2 + 10),
+      color(255, 215, 0),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    add([
+      text(currentCoins >= 5 ? "[2] KAUFEN" : "ZU TEUER", { size: 16 }),
+      pos(width() / 2, height() / 2 + 50),
+      color(currentCoins >= 5 ? rgb(100, 255, 100) : rgb(255, 100, 100)),
+      anchor("center"),
+      z(10),
+      "hint2"
+    ]);
+    
+    // Item 3: Eisenrüstung
+    add([
+      rect(350, 180),
+      pos(width() / 2 + 400, height() / 2),
+      color(60, 60, 100),
+      outline(3, currentCoins >= 20 && !boughtArmor ? rgb(100, 255, 100) : rgb(100, 100, 100)),
+      anchor("center"),
+      z(5)
+    ]);
+    
+    add([
+      text("🛡️ EISENRÜSTUNG", { size: 20 }),
+      pos(width() / 2 + 400, height() / 2 - 60),
+      color(180, 180, 180),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    add([
+      text("-1 Herz Schaden", { size: 16 }),
+      pos(width() / 2 + 400, height() / 2 - 25),
+      color(200, 200, 200),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    add([
+      text("20 💰", { size: 20 }),
+      pos(width() / 2 + 400, height() / 2 + 10),
+      color(255, 215, 0),
+      anchor("center"),
+      z(10)
+    ]);
+    
+    if (boughtArmor) {
+      add([
+        text("✓ GEKAUFT", { size: 16 }),
+        pos(width() / 2 + 400, height() / 2 + 50),
+        color(100, 255, 100),
+        anchor("center"),
+        z(10)
+      ]);
+    } else {
+      add([
+        text(currentCoins >= 20 ? "[3] KAUFEN" : "ZU TEUER", { size: 16 }),
+        pos(width() / 2 + 400, height() / 2 + 50),
+        color(currentCoins >= 20 ? rgb(100, 255, 100) : rgb(255, 100, 100)),
+        anchor("center"),
+        z(10),
+        "hint3"
+      ]);
+    }
+    
+    // Kauf-Logik für Münz-Shop
+    onKeyPress("1", () => {
+      if (!boughtNetherite && currentCoins >= 20) {
+        boughtNetherite = true;
+        currentCoins -= 20;
+        destroyAll("hint1");
+        add([
+          text("✓ GEKAUFT!", { size: 16 }),
+          pos(width() / 2 - 400, height() / 2 + 50),
+          color(100, 255, 100),
+          anchor("center"),
+          z(10)
+        ]);
+      }
+    });
+    
+    onKeyPress("2", () => {
+      if (currentCoins >= 5) {
+        currentCoins -= 5;
+        currentApples++;
+        destroyAll("hint2");
+        add([
+          text("✓ GEKAUFT! (mehrfach möglich)", { size: 14 }),
+          pos(width() / 2, height() / 2 + 50),
+          color(100, 255, 100),
+          anchor("center"),
+          z(10),
+          lifespan(1.5),
+          "hint2"
+        ]);
+      }
+    });
+    
+    onKeyPress("3", () => {
+      if (!boughtArmor && currentCoins >= 20) {
+        boughtArmor = true;
+        currentCoins -= 20;
+        destroyAll("hint3");
+        add([
+          text("✓ GEKAUFT!", { size: 16 }),
+          pos(width() / 2 + 400, height() / 2 + 50),
+          color(100, 255, 100),
+          anchor("center"),
+          z(10)
+        ]);
+      }
     });
   }
+  
+  // Unten: Weiter zum Level
+  add([
+    text("Drücke ENTER um zum Level zu gehen", { size: 22 }),
+    pos(width() / 2, height() - 40),
+    color(200, 200, 200),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  onKeyPress("enter", () => {
+    go("game", {
+      level: data.level,
+      playerHealth: data.playerHealth,
+      goldenApples: currentApples,
+      coins: currentCoins,
+      hasShield: data.hasShield,
+      hasDiamondSword: boughtDiamond,
+      hasNetheriteSword: boughtNetherite,
+      hasIronArmor: boughtArmor
+    });
+  });
 });
 
 // Haupt-Spiel-Szene
 scene("game", (levelData) => {
   // Spielzustand
   const level = levelData?.level || 1;
+  const hasShield = levelData?.hasShield || false;
+  const hasDiamondSword = levelData?.hasDiamondSword || false;
+  const hasNetheriteSword = levelData?.hasNetheriteSword || false;
+  const hasIronArmor = levelData?.hasIronArmor || false;
   const hasUpgradedSword = level === 3 && (levelData?.goldenApples || 13) >= 11;
-  const swordDamage = hasUpgradedSword ? 4 : 2.5;
+  
+  // Schwert-Schaden berechnen (bestes Schwert gewinnt)
+  let swordDamage = 2.5; // Normal
+  let swordType = "normal";
+  if (hasNetheriteSword) {
+    swordDamage = 10; // Netherite-Schwert! (STÄRKSTES)
+    swordType = "netherite";
+  } else if (hasDiamondSword) {
+    swordDamage = 6; // Diamantschwert!
+    swordType = "diamond";
+  } else if (hasUpgradedSword) {
+    swordDamage = 4; // Gold-Schwert
+    swordType = "gold";
+  }
   
   const gameState = {
     playerHealth: levelData?.playerHealth || 10,
     playerMaxHealth: 10,
     goldenApples: levelData?.goldenApples || 13,
+    coins: levelData?.coins || 0,
     selectedSlot: 0, // 0 = Schwert, 1 = Äpfel
     zombies: [],
     currentLevel: level,
     swordDamage: swordDamage,
-    hasUpgradedSword: hasUpgradedSword
+    swordType: swordType,
+    hasUpgradedSword: hasUpgradedSword,
+    hasShield: hasShield,
+    hasDiamondSword: hasDiamondSword,
+    hasNetheriteSword: hasNetheriteSword,
+    hasIronArmor: hasIronArmor,
+    shieldActive: false
   };
   
   // Level-Anzeige oben links
@@ -243,7 +750,7 @@ scene("game", (levelData) => {
   ]);
 
   // Zombies erstellen
-  function spawnZombie(xPos, health) {
+  function spawnZombie(xPos, health, damage = 1) {
     const zombie = add([
       rect(40, 60),
       pos(xPos, height() - 140),
@@ -256,7 +763,8 @@ scene("game", (levelData) => {
         maxHealth: health,
         speed: 30,
         attackCooldown: 0,
-        isDead: false
+        isDead: false,
+        damage: damage
       }
     ]);
     
@@ -299,7 +807,7 @@ scene("game", (levelData) => {
       
       // Zombie greift Spieler an bei Berührung
       if (zombie.isColliding(player) && zombie.attackCooldown <= 0) {
-        damagePlayer(1);
+        damagePlayer(zombie.damage); // Benutze den Zombie-Schaden
         zombie.attackCooldown = 1; // 1 Sekunde Cooldown
       }
     });
@@ -422,6 +930,47 @@ scene("game", (levelData) => {
   } else if (level === 4) {
     // Level 4: BOSS-KAMPF!
     spawnBoss(400, 50); // Ein riesiger Boss mit 50 Herzen!
+  } else if (level === 5) {
+    // Level 5: 2 Super-Zombies mit je 25 Herzen
+    spawnZombie(300, 25);
+    spawnZombie(700, 25);
+  } else if (level === 6) {
+    // Level 6: 5 Starke Zombies mit je 40 Herzen und 2 Schaden!
+    spawnZombie(200, 40, 2);
+    spawnZombie(400, 40, 2);
+    spawnZombie(600, 40, 2);
+    spawnZombie(800, 40, 2);
+    spawnZombie(1000, 40, 2);
+  }
+
+  // Schild anzeigen (wenn vorhanden)
+  let shieldIndicator = null;
+  if (hasShield) {
+    shieldIndicator = add([
+      text("🛡️", { size: 32 }),
+      pos(player.pos.x - 50, player.pos.y),
+      color(100, 200, 255),
+      anchor("center"),
+      z(90),
+      opacity(0.5)
+    ]);
+    
+    shieldIndicator.onUpdate(() => {
+      shieldIndicator.pos = vec2(player.pos.x - 50, player.pos.y);
+      shieldIndicator.opacity = gameState.shieldActive ? 1 : 0.5;
+      shieldIndicator.color = gameState.shieldActive ? rgb(100, 255, 255) : rgb(100, 200, 255);
+    });
+  }
+  
+  // Schild-Steuerung
+  if (hasShield) {
+    onKeyDown("shift", () => {
+      gameState.shieldActive = true;
+    });
+    
+    onKeyRelease("shift", () => {
+      gameState.shieldActive = false;
+    });
   }
 
   // Spieler-Steuerung
@@ -440,6 +989,10 @@ scene("game", (levelData) => {
   // Angriff mit linker Maustaste
   onMousePress("left", () => {
     if (gameState.selectedSlot === 0 && !player.isAttacking && player.attackCooldown <= 0) {
+      // Schild deaktivieren beim Angriff
+      if (gameState.shieldActive) {
+        gameState.shieldActive = false;
+      }
       attackWithSword();
     }
   });
@@ -509,7 +1062,12 @@ scene("game", (levelData) => {
         go("victory", {
           playerHealth: gameState.playerHealth,
           goldenApples: gameState.goldenApples,
-          currentLevel: gameState.currentLevel
+          coins: gameState.coins,
+          currentLevel: gameState.currentLevel,
+          hasShield: gameState.hasShield,
+          hasDiamondSword: gameState.hasDiamondSword,
+          hasNetheriteSword: gameState.hasNetheriteSword,
+          hasIronArmor: gameState.hasIronArmor
         });
       }
     }
@@ -517,7 +1075,23 @@ scene("game", (levelData) => {
 
   // Spieler Schaden zufügen
   function damagePlayer(damage) {
-    gameState.playerHealth -= damage;
+    // Kein Schaden wenn Schild aktiv ist!
+    if (gameState.shieldActive) {
+      // Schild-Block-Animation (blau aufleuchten)
+      player.color = rgb(100, 255, 255);
+      setTimeout(() => {
+        player.color = rgb(100, 150, 255);
+      }, 100);
+      return; // Kein Schaden!
+    }
+    
+    // Rüstung reduziert Schaden um 1 (mindestens 0.5 Schaden)
+    let actualDamage = damage;
+    if (gameState.hasIronArmor) {
+      actualDamage = Math.max(0.5, damage - 1);
+    }
+    
+    gameState.playerHealth -= actualDamage;
     
     // Spieler-Treffer-Animation
     player.color = rgb(255, 100, 100);
@@ -592,19 +1166,34 @@ scene("game", (levelData) => {
     ]);
   }
 
-  // Schwert im ersten Slot (gold wenn aufgewertet, sonst grau)
+  // Schwert im ersten Slot (Farbe basierend auf Typ)
+  let swordColor = rgb(200, 200, 200); // Normal (grau)
+  let swordIcon = "⚔";
+  let swordEffect = null;
+  
+  if (hasNetheriteSword) {
+    swordColor = rgb(200, 50, 50); // Netherite (dunkelrot)
+    swordEffect = "🔥";
+  } else if (hasDiamondSword) {
+    swordColor = rgb(100, 200, 255); // Diamant (cyan)
+    swordEffect = "💎";
+  } else if (hasUpgradedSword) {
+    swordColor = rgb(255, 215, 0); // Gold
+    swordEffect = "✨";
+  }
+  
   add([
-    text("⚔", { size: 24 }),
+    text(swordIcon, { size: 24 }),
     pos(width() / 2 - 160, height() - 30),
-    color(hasUpgradedSword ? rgb(255, 215, 0) : rgb(200, 200, 200)), // Gold wenn aufgewertet!
+    color(swordColor),
     anchor("center"),
     z(52)
   ]);
   
-  // Wenn Schwert aufgewertet ist, zeige Glitzer-Effekt
-  if (hasUpgradedSword) {
+  // Zeige Effekt bei besonderem Schwert
+  if (swordEffect) {
     add([
-      text("✨", { size: 14 }),
+      text(swordEffect, { size: 14 }),
       pos(width() / 2 - 140, height() - 40),
       color(255, 255, 255),
       anchor("center"),
