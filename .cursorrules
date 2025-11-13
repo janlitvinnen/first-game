@@ -1,0 +1,40 @@
+# Game Development Rules
+
+## Testing Protocol
+After EVERY code change to the game:
+1. Open the index.html file directly in the browser (use file:// protocol or navigate to the file)
+2. Take a snapshot of the page to inspect elements and functionality
+3. Test all interactive features that were modified or could be affected
+4. Check browser console for any JavaScript errors or warnings
+5. Verify the game renders correctly and behaves as expected
+
+## Error Detection and Fixing
+If ANY errors are detected during testing:
+- Console errors (JavaScript runtime errors)
+- Visual rendering issues
+- Broken game mechanics or interactions
+- Performance problems
+- Any unexpected behavior
+
+Then IMMEDIATELY:
+1. Identify the root cause of the error
+2. Fix the issue in the code
+3. Re-test in the browser to verify the fix
+4. Continue this cycle until no errors remain
+
+## Quality Standards
+- All game features must work correctly in the browser
+- No console errors or warnings should be present
+- The game should be playable without issues
+- User interactions should respond as expected
+- Visual elements should render properly
+
+## Workflow
+Never consider a task complete until:
+- The game has been tested in the browser
+- All features work correctly
+- No errors are present in the console
+- The gameplay experience is smooth and bug-free
+
+Always use the browser testing tools to validate changes before moving on to the next task.
+
