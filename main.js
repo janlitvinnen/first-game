@@ -5,8 +5,8 @@ kaboom({
   scale: 1.5,
 });
 
-// Schwerkraft aktivieren (wie Minecraft)
-setGravity(1600);
+// Schwerkraft aktivieren (wie Minecraft) - Stark reduziert für stabile Kollision
+setGravity(800);
 
 // ====== SPIELER-DATEN ======
 let playerSpawned = false;
@@ -14,6 +14,9 @@ let inventoryOpen = false;
 let hearts = 10;
 let maxHearts = 10;
 let player = null;
+let lookingDown = false; // Q gedrückt = nach unten schauen
+let facingRight = true; // Blickrichtung
+let fallStartY = 0; // Für Fall-Schaden
 
 // Inventar System mit 8 Slots (Hotbar)
 let inventory = [
@@ -63,7 +66,7 @@ for (let x = 0; x < worldWidth; x++) {
       blockColor = rgb(128, 128, 128); // Grau
     }
     
-    // Block erstellen
+    // Block erstellen - MIT SOLIDER KOLLISION
     add([
       rect(BLOCK_SIZE, BLOCK_SIZE),
       pos(x * BLOCK_SIZE, y * BLOCK_SIZE),
@@ -71,8 +74,11 @@ for (let x = 0; x < worldWidth; x++) {
       outline(1, rgb(0, 0, 0)),
       area(),
       body({ isStatic: true }),
+      z(0),
       blockType,
-      "block"
+      "terrain_block",
+      "solid", // WICHTIG: Solid Tag für Kollision
+      { blockName: blockType }
     ]);
   }
   
@@ -91,11 +97,15 @@ for (let x = 0; x < worldWidth; x++) {
         outline(1, rgb(0, 0, 0)),
         area(),
         body({ isStatic: true }),
-        "tree"
+        z(0),
+        "tree",
+        "breakable",
+        "solid", // Solid für Kollision
+        { blockName: "wood" }
       ]);
     }
     
-    // Blätter (Krone)
+    // Blätter (Krone) - KEINE Kollision, man kann durchlaufen
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -2; dy <= -1; dy++) {
         add([
@@ -103,7 +113,10 @@ for (let x = 0; x < worldWidth; x++) {
           pos(treeX + dx * BLOCK_SIZE, treeY + dy * BLOCK_SIZE),
           color(34, 139, 34), // Grün
           outline(1, rgb(0, 0, 0)),
-          "leaves"
+          z(0),
+          "leaves",
+          "breakable",
+          { blockName: "leaves" }
         ]);
       }
     }
@@ -130,7 +143,9 @@ function createMinecraftHouse(blockX, blockY) {
         outline(1, rgb(0, 0, 0)),
         area(),
         body({ isStatic: true }),
-        "house_wall"
+        z(0),
+        "house_wall",
+        "solid" // Solid für Kollision
       ]);
     }
   }
@@ -144,7 +159,9 @@ function createMinecraftHouse(blockX, blockY) {
       outline(1, rgb(0, 0, 0)),
       area(),
       body({ isStatic: true }),
-      "house_roof"
+      z(0),
+      "house_roof",
+      "solid" // Solid für Kollision
     ]);
   }
 }
@@ -153,6 +170,55 @@ function createMinecraftHouse(blockX, blockY) {
 createMinecraftHouse(15, 14);
 createMinecraftHouse(25, 13);
 createMinecraftHouse(70, 15);
+
+// ====== TIERE SPAWNEN (KÜHE UND SCHWEINE) ======
+function spawnAnimal(type, x, groundY) {
+  const animalColor = type === "cow" ? rgb(80, 50, 30) : rgb(255, 192, 203); // Braun oder Rosa
+  const animalSize = BLOCK_SIZE * 1.2;
+  
+  const animal = add([
+    rect(animalSize, animalSize * 0.8),
+    pos(x * BLOCK_SIZE, (groundY - 1.5) * BLOCK_SIZE),
+    color(animalColor),
+    outline(2, rgb(0, 0, 0)),
+    area(),
+    body(),
+    anchor("botleft"),
+    z(5),
+    type === "cow" ? "cow" : "pig",
+    "animal",
+    {
+      walkSpeed: 30,
+      direction: choose([1, -1]),
+    }
+  ]);
+  
+  // Kopf
+  animal.add([
+    rect(animalSize * 0.5, animalSize * 0.5),
+    pos(type === "cow" ? 0 : animalSize * 0.6, -animalSize * 0.6),
+    color(animalColor),
+    outline(2, rgb(0, 0, 0)),
+  ]);
+  
+  // Einfache KI - Hin und her laufen
+  animal.onUpdate(() => {
+    animal.move(animal.walkSpeed * animal.direction, 0);
+    
+    // Richtung zufällig ändern
+    if (Math.random() < 0.01) {
+      animal.direction *= -1;
+    }
+  });
+}
+
+// Tiere spawnen
+for (let i = 0; i < 10; i++) {
+  const x = Math.floor(Math.random() * (worldWidth - 10)) + 5;
+  const groundY = Math.floor(worldHeight * 0.7 + Math.sin(x * 0.1) * 3);
+  const animalType = Math.random() > 0.5 ? "cow" : "pig";
+  spawnAnimal(animalType, x, groundY);
+}
 
 // ====== SPAWNING TEXT ======
 const spawnText = add([
@@ -165,16 +231,14 @@ const spawnText = add([
 ]);
 
 // ====== HERZ-ANZEIGE (UI) - MINECRAFT STYLE ======
-// Herzen werden individuell gezeichnet für bessere Sichtbarkeit
 function updateHearts() {
   destroyAll("heart_ui");
   
   for (let i = 0; i < maxHearts; i++) {
-    const heartX = 10 + i * 25; // Nebeneinander wie in Minecraft
+    const heartX = 10 + i * 25;
     const heartY = 10;
     
     if (i < hearts) {
-      // Volles Herz (rot)
       add([
         text("♥", { size: 28 }),
         pos(heartX, heartY),
@@ -184,7 +248,6 @@ function updateHearts() {
         "heart_ui"
       ]);
     } else {
-      // Leeres Herz (grau/schwarz outline)
       add([
         text("♡", { size: 28 }),
         pos(heartX, heartY),
@@ -197,7 +260,6 @@ function updateHearts() {
   }
 }
 
-// Initial Herzen zeichnen
 updateHearts();
 
 // ====== HOTBAR (8 FELDER UNTEN) ======
@@ -220,6 +282,18 @@ for (let i = 0; i < 8; i++) {
   ]);
 }
 
+// Block-Icons für Inventar
+function getBlockIcon(blockName) {
+  if (blockName === "wood") return "🪵";
+  if (blockName === "leaves") return "🍃";
+  if (blockName === "dirt") return "🟫";
+  if (blockName === "stone") return "🗿";
+  if (blockName === "grass") return "🟩";
+  if (blockName === "sword") return "⚔";
+  if (blockName === "apple") return "🍎";
+  return "?";
+}
+
 // Hotbar Update-Funktion
 function updateHotbar() {
   destroyAll("hotbar_icon");
@@ -229,41 +303,27 @@ function updateHotbar() {
     const slotX = hotbarStartX + i * (slotSize + 5);
     const slot = inventory[i];
     
-    if (slot && slot.item === "sword") {
-      add([
-        text("⚔", { size: 30 }),
-        pos(slotX + 10, hotbarY + 5),
-        color(180, 180, 180),
-        z(1000),
-        fixed(),
-        "hotbar_icon"
-      ]);
+    if (slot) {
+      const icon = getBlockIcon(slot.item);
       
       add([
-        text("1", { size: 14 }),
-        pos(slotX + 35, hotbarY + 35),
-        color(255, 255, 255),
-        z(1000),
-        fixed(),
-        "hotbar_count"
-      ]);
-    } else if (slot && slot.item === "apple") {
-      add([
-        text("🍎", { size: 30 }),
+        text(icon, { size: 30 }),
         pos(slotX + 8, hotbarY + 5),
         z(1000),
         fixed(),
         "hotbar_icon"
       ]);
       
-      add([
-        text(slot.count.toString(), { size: 14 }),
-        pos(slotX + 35, hotbarY + 35),
-        color(255, 255, 255),
-        z(1000),
-        fixed(),
-        "hotbar_count"
-      ]);
+      if (slot.count > 1) {
+        add([
+          text(slot.count.toString(), { size: 14 }),
+          pos(slotX + 35, hotbarY + 35),
+          color(255, 255, 255),
+          z(1000),
+          fixed(),
+          "hotbar_count"
+        ]);
+      }
     }
   }
 }
@@ -280,109 +340,225 @@ const selectedIndicator = add([
   "selected_indicator"
 ]);
 
+// Item ins Inventar hinzufügen
+function addToInventory(itemName) {
+  // Prüfen ob Item schon vorhanden ist
+  for (let i = 0; i < 8; i++) {
+    if (inventory[i] && inventory[i].item === itemName) {
+      inventory[i].count++;
+      updateHotbar();
+      return;
+    }
+  }
+  
+  // Neuen Slot finden
+  for (let i = 0; i < 8; i++) {
+    if (!inventory[i]) {
+      inventory[i] = { item: itemName, count: 1 };
+      updateHotbar();
+      return;
+    }
+  }
+}
+
 // ====== SPIELER NACH 3 SEKUNDEN SPAWNEN ======
 wait(3, () => {
   destroy(spawnText);
   
-  // Minecraft-Style Spielfigur erstellen - AUF DEM BODEN SPAWNEN!
+  // WICHTIG: Boden-Block an Spawn-Position finden
+  const groundBlocks = get("terrain_block").filter(block => {
+    return Math.abs(block.pos.x - spawnX * BLOCK_SIZE) < BLOCK_SIZE / 2 &&
+           block.is("grass");
+  });
+  
+  let spawnYPos = (spawnGroundY - 2) * BLOCK_SIZE;
+  
+  // Wenn Boden gefunden, direkt drauf spawnen
+  if (groundBlocks.length > 0) {
+    const groundBlock = groundBlocks[0];
+    spawnYPos = groundBlock.pos.y - BLOCK_SIZE * 1.8; // Direkt auf dem Block
+  }
+  
+  // Minecraft-Style Spielfigur erstellen - MIT FESTEN BODEN-KONTAKT
   player = add([
-    rect(BLOCK_SIZE - 8, BLOCK_SIZE * 1.8), // Körper
-    pos(spawnX * BLOCK_SIZE, (spawnGroundY - 2) * BLOCK_SIZE), // AUF DEM BODEN!
-    color(0, 150, 200), // Blau (wie Steve)
-    anchor("botleft"),
-    area(),
-    body(),
+    rect(BLOCK_SIZE - 4, BLOCK_SIZE * 1.8), // Breiter für bessere Kollision
+    pos(spawnX * BLOCK_SIZE, spawnYPos + BLOCK_SIZE * 1.8), // Position angepasst
+    color(0, 150, 200),
+    anchor("bot"), // bot ist stabiler für Plattformer
+    area({
+      scale: 0.7, // Noch kleinere Hitbox
+    }),
+    body({
+      jumpForce: 500, // Reduziert wegen niedrigerer Schwerkraft
+      maxVelocity: 400, // Stark reduziert
+      stickToPlatform: true, // Bleibt auf Plattformen
+      mass: 2, // Schwerer = stabiler
+    }),
     z(10),
     "player",
   ]);
   
-  // Kopf des Spielers
+  // Kopf des Spielers (oben auf dem Körper)
   player.add([
-    rect(BLOCK_SIZE - 10, BLOCK_SIZE - 10),
-    pos(7, -BLOCK_SIZE * 1.8 - 12),
+    rect(BLOCK_SIZE - 6, BLOCK_SIZE - 6),
+    pos(-2, -BLOCK_SIZE - 5),
     color(222, 184, 135), // Hautfarbe
     outline(2),
   ]);
   
-  // Arme
+  // Linker Arm
   player.add([
-    rect(6, BLOCK_SIZE * 0.6),
-    pos(-2, -BLOCK_SIZE * 1.3),
+    rect(8, BLOCK_SIZE * 0.7),
+    pos(-10, -BLOCK_SIZE * 1.3),
     color(0, 150, 200),
     outline(1),
   ]);
   
+  // Rechter Arm
   player.add([
-    rect(6, BLOCK_SIZE * 0.6),
-    pos(BLOCK_SIZE - 4, -BLOCK_SIZE * 1.3),
+    rect(8, BLOCK_SIZE * 0.7),
+    pos(BLOCK_SIZE - 6, -BLOCK_SIZE * 1.3),
     color(0, 150, 200),
     outline(1),
   ]);
   
   playerSpawned = true;
+  fallStartY = player.pos.y;
   
-  // KAMERA FOLGT DEM SPIELER - FIRST PERSON STYLE (aus den Augen)
+  // KAMERA FOLGT DEM SPIELER
   player.onUpdate(() => {
-    // Kamera ist auf Augenhöhe des Spielers
-    const camX = player.pos.x;
-    const camY = player.pos.y - BLOCK_SIZE * 0.9; // Augenhöhe
-    camPos(camX, camY);
+    // Augenhöhe = Spieler-Position - Augenhöhe
+    let camY = player.pos.y - BLOCK_SIZE * 0.9;
+    
+    // Nach unten schauen (Q gedrückt)
+    if (lookingDown) {
+      camY = player.pos.y + BLOCK_SIZE * 2;
+    }
+    
+    camPos(player.pos.x, camY);
+    
+    // ===== VOID CHECK: Zu tief gefallen? RESPAWN! =====
+    const voidLevel = worldHeight * BLOCK_SIZE + BLOCK_SIZE * 5; // 5 Blöcke unter der Welt
+    
+    if (player.pos.y > voidLevel) {
+      // RESPAWN AM SPAWN-PUNKT, 3 BLÖCKE HÖHER!
+      player.pos.x = spawnX * BLOCK_SIZE;
+      player.pos.y = (spawnYPos + BLOCK_SIZE * 1.8) - BLOCK_SIZE * 3; // 3 Blöcke über Spawn
+      fallStartY = player.pos.y;
+      
+      // Schaden beim Respawn
+      hearts = Math.max(1, hearts - 2); // -2 Herzen, mindestens 1 bleibt
+      updateHearts();
+      
+      // Respawn Nachricht
+      const respawnText = add([
+        text("RESPAWN! -2 ♥", { size: 40 }),
+        pos(width() / 2, height() / 2),
+        anchor("center"),
+        color(255, 50, 50),
+        z(2000),
+        fixed(),
+      ]);
+      
+      wait(1.5, () => {
+        if (respawnText.exists()) destroy(respawnText);
+      });
+      
+      return; // Andere Checks überspringen
+    }
+    
+    // Fall-Schaden prüfen
+    if (player.isGrounded()) {
+      const fallDistance = fallStartY - player.pos.y;
+      const blocksFallen = fallDistance / BLOCK_SIZE;
+      
+      if (blocksFallen > 4) {
+        // Schaden berechnen: 1 Herz pro 4 Blöcke
+        const damage = Math.floor((blocksFallen - 4) / 4) + 1;
+        hearts = Math.max(0, hearts - damage);
+        updateHearts();
+        
+        // Fall-Schaden Feedback
+        const damageText = add([
+          text(`-${damage} ♥`, { size: 40 }),
+          pos(width() / 2, height() / 2),
+          anchor("center"),
+          color(255, 50, 50),
+          z(2000),
+          fixed(),
+        ]);
+        
+        wait(1, () => {
+          if (damageText.exists()) destroy(damageText);
+        });
+      }
+      
+      fallStartY = player.pos.y;
+    } else {
+      // Spieler fällt, aktualisiere Start-Y nur wenn höher
+      if (player.pos.y < fallStartY) {
+        fallStartY = player.pos.y;
+      }
+    }
   });
 });
 
 // ====== SPIELER BEWEGUNG - MINECRAFT-STYLE ======
-const SPEED = 200;
-const JUMP_FORCE = 550;
+const SPEED = 120; // Noch weiter verringert für sichere Kollision
+const JUMP_FORCE = 500; // Angepasst an niedrigere Schwerkraft
 
-// W = VORWÄRTS (nach rechts)
 onKeyDown("w", () => {
   if (player && !inventoryOpen) {
     player.move(SPEED, 0);
+    facingRight = true;
   }
 });
 
-// S = RÜCKWÄRTS (nach links)
 onKeyDown("s", () => {
   if (player && !inventoryOpen) {
     player.move(-SPEED, 0);
+    facingRight = false;
   }
 });
 
-// A = LINKS (seitlich - optional)
 onKeyDown("a", () => {
   if (player && !inventoryOpen) {
     player.move(-SPEED, 0);
+    facingRight = false;
   }
 });
 
-// D = RECHTS (seitlich - optional)
 onKeyDown("d", () => {
   if (player && !inventoryOpen) {
     player.move(SPEED, 0);
+    facingRight = true;
   }
 });
 
-// SPACE = SPRINGEN (nur wenn auf dem Boden)
+// SPACE = SPRINGEN - mit kleiner Verzögerung für bessere Kollision
 onKeyPress("space", () => {
-  if (player && player.isGrounded() && !inventoryOpen) {
-    player.jump(JUMP_FORCE);
+  if (player && !inventoryOpen) {
+    if (player.isGrounded()) {
+      player.jump(JUMP_FORCE);
+    }
   }
+});
+
+// Q = NACH UNTEN SCHAUEN
+onKeyPress("q", () => {
+  lookingDown = !lookingDown;
 });
 
 // ====== MAUSRAD ZUM SLOT WECHSELN ======
 onScroll((delta) => {
   if (inventoryOpen) return;
   
-  // Delta.y ist negativ beim Hochscrollen, positiv beim Runterscrollen
   if (delta.y > 0) {
-    // Runterscrollen = nächster Slot
     selectedSlot = (selectedSlot + 1) % 8;
   } else if (delta.y < 0) {
-    // Hochscrollen = vorheriger Slot
     selectedSlot = (selectedSlot - 1 + 8) % 8;
   }
   
-  // Indikator bewegen
   selectedIndicator.pos.x = hotbarStartX + selectedSlot * (slotSize + 5) - 2;
 });
 
@@ -443,9 +619,7 @@ onKeyPress("e", () => {
       
       const slot = inventory[i];
       if (slot) {
-        let icon = "";
-        if (slot.item === "sword") icon = "⚔";
-        if (slot.item === "apple") icon = "🍎";
+        const icon = getBlockIcon(slot.item);
         
         add([
           text(icon, { size: 30 }),
@@ -470,95 +644,133 @@ onKeyPress("e", () => {
   }
 });
 
-// ====== LINKSKLICK ZUM SCHLAGEN UND BLÖCKE ABBAUEN ======
+// ====== LINKSKLICK: BLÖCKE ABBAUEN ODER PLATZIEREN ======
 let canAttack = true;
-let attackCooldown = 0.5;
+let attackCooldown = 0.3;
 
 onMousePress("left", () => {
   if (!playerSpawned || inventoryOpen || !canAttack || !player) return;
   
-  // Prüfen ob wir einen Block/Baum treffen
-  const attackRange = 80; // Reichweite wie in Minecraft
-  const attackX = player.pos.x + attackRange;
-  const attackY = player.pos.y - 30;
+  const currentSlot = inventory[selectedSlot];
+  const attackRange = 80;
   
-  // Alle Blöcke in Reichweite prüfen
-  const blocksInRange = get("tree").concat(get("leaves"));
-  let blockDestroyed = false;
+  // Prüfen ob wir einen Block platzieren können
+  const canPlaceBlock = currentSlot && 
+    (currentSlot.item === "wood" || currentSlot.item === "dirt" || 
+     currentSlot.item === "stone" || currentSlot.item === "grass");
   
-  for (const block of blocksInRange) {
-    const distance = Math.sqrt(
-      Math.pow(block.pos.x - attackX, 2) + 
-      Math.pow(block.pos.y - attackY, 2)
+  if (canPlaceBlock) {
+    // BLOCK PLATZIEREN
+    let placeX = player.pos.x + (facingRight ? attackRange : -attackRange);
+    let placeY = player.pos.y;
+    
+    // Nach unten schauen und springen = Block unter sich platzieren
+    if (lookingDown && !player.isGrounded()) {
+      placeX = player.pos.x;
+      placeY = player.pos.y + BLOCK_SIZE * 1.5;
+    }
+    // Nach unten schauen = Block direkt unter Füßen
+    else if (lookingDown) {
+      placeX = player.pos.x;
+      placeY = player.pos.y + BLOCK_SIZE;
+    }
+    
+    // Auf Grid snappen
+    const gridX = Math.round(placeX / BLOCK_SIZE) * BLOCK_SIZE;
+    const gridY = Math.round(placeY / BLOCK_SIZE) * BLOCK_SIZE;
+    
+    // Prüfen ob Platz frei ist
+    const blocksAtPos = get("*", { pos: vec2(gridX, gridY) }).filter(obj => 
+      obj.is("terrain_block") || obj.is("breakable") || obj.is("placed_block")
     );
     
-    if (distance < attackRange) {
-      // Block zerstören!
-      destroy(block);
-      blockDestroyed = true;
+    if (blocksAtPos.length === 0) {
+      // Block platzieren!
+      let blockColor = rgb(139, 90, 43);
+      if (currentSlot.item === "wood") blockColor = rgb(101, 67, 33);
+      if (currentSlot.item === "stone") blockColor = rgb(128, 128, 128);
+      if (currentSlot.item === "grass") blockColor = rgb(34, 139, 34);
       
-      // Holz-Partikel beim Zerstören
-      for (let i = 0; i < 8; i++) {
-        const particle = add([
-          rect(6, 6),
-          pos(block.pos.x + Math.random() * BLOCK_SIZE, block.pos.y + Math.random() * BLOCK_SIZE),
-          color(101, 67, 33), // Braune Partikel
-          opacity(1),
-          z(14),
-          "break_particle"
-        ]);
-        
-        wait(0.5, () => {
-          if (particle.exists()) {
-            destroy(particle);
-          }
-        });
+      add([
+        rect(BLOCK_SIZE, BLOCK_SIZE),
+        pos(gridX, gridY),
+        color(blockColor),
+        outline(1, rgb(0, 0, 0)),
+        area(),
+        body({ isStatic: true }),
+        z(0),
+        "placed_block",
+        "breakable",
+        "solid", // Solid für Kollision
+        { blockName: currentSlot.item }
+      ]);
+      
+      // Item aus Inventar entfernen
+      currentSlot.count--;
+      if (currentSlot.count === 0) {
+        inventory[selectedSlot] = null;
       }
+      updateHotbar();
+    }
+  } else {
+    // BLOCK ABBAUEN
+    const attackX = player.pos.x + (facingRight ? attackRange : -attackRange);
+    const attackY = player.pos.y - BLOCK_SIZE;
+    
+    const blocksInRange = get("breakable");
+    let blockDestroyed = false;
+    
+    for (const block of blocksInRange) {
+      const distance = Math.sqrt(
+        Math.pow(block.pos.x - attackX, 2) + 
+        Math.pow(block.pos.y - attackY, 2)
+      );
       
-      break; // Nur einen Block pro Klick
+      if (distance < attackRange) {
+        const blockName = block.blockName;
+        
+        // Block zerstören
+        destroy(block);
+        blockDestroyed = true;
+        
+        // Item ins Inventar
+        addToInventory(blockName);
+        
+        // Partikel
+        for (let i = 0; i < 8; i++) {
+          const particle = add([
+            rect(6, 6),
+            pos(block.pos.x + Math.random() * BLOCK_SIZE, block.pos.y + Math.random() * BLOCK_SIZE),
+            color(101, 67, 33),
+            opacity(1),
+            z(14),
+            "break_particle"
+          ]);
+          
+          wait(0.5, () => {
+            if (particle.exists()) destroy(particle);
+          });
+        }
+        
+        break;
+      }
+    }
+    
+    // Schlag-Effekt
+    if (!blockDestroyed) {
+      const attackEffect = add([
+        rect(50, 8),
+        pos(attackX, attackY),
+        color(255, 255, 150),
+        z(15),
+        opacity(0.8),
+      ]);
+      
+      wait(0.15, () => {
+        if (attackEffect.exists()) destroy(attackEffect);
+      });
     }
   }
-  
-  // Schlag-Effekt anzeigen
-  const attackEffect = add([
-    rect(50, 8),
-    pos(attackX, attackY),
-    color(255, 255, 150),
-    z(15),
-    opacity(0.8),
-    "attack_effect"
-  ]);
-  
-  // Normale Schlag-Partikel
-  for (let i = 0; i < 5; i++) {
-    const particle = add([
-      rect(4, 4),
-      pos(attackX + Math.random() * 40 - 20, attackY + Math.random() * 40 - 20),
-      color(255, 255, 0),
-      opacity(1),
-      z(14),
-      "particle"
-    ]);
-    
-    wait(0.2, () => {
-      if (particle.exists()) {
-        destroy(particle);
-      }
-    });
-  }
-  
-  const swingText = add([
-    text(blockDestroyed ? "⛏" : "⚔", { size: 50 }),
-    pos(attackX + 20, attackY - 20),
-    opacity(1),
-    z(20),
-    "swing_icon"
-  ]);
-  
-  wait(0.15, () => {
-    if (attackEffect.exists()) destroy(attackEffect);
-    if (swingText.exists()) destroy(swingText);
-  });
   
   canAttack = false;
   wait(attackCooldown, () => {
@@ -581,7 +793,7 @@ onMousePress("right", () => {
     }
     
     updateHotbar();
-    updateHearts(); // Herzen aktualisieren!
+    updateHearts();
     
     const eatText = add([
       text("+2 ♥", { size: 40 }),
@@ -593,9 +805,7 @@ onMousePress("right", () => {
     ]);
     
     wait(1, () => {
-      if (eatText.exists()) {
-        destroy(eatText);
-      }
+      if (eatText.exists()) destroy(eatText);
     });
   }
 });
@@ -610,7 +820,7 @@ for (let i = 1; i <= 8; i++) {
 
 // ====== INFO TEXT ======
 add([
-  text("W/D = Vorwärts/Zurück | A/S = Links/Rechts | SPACE = Springen | E = Inventar | Mausrad = Slot wechseln", { size: 10 }),
+  text("W/D = Vor/Zurück | SPACE = Springen | Q = Runter schauen | E = Inventar | Mausrad = Slot | Links = Abbauen/Bauen", { size: 9 }),
   pos(width() / 2, height() - 10),
   anchor("center"),
   color(255, 255, 255),
