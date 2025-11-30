@@ -1,27 +1,87 @@
-# Dein eigenes Spiel: **Dodge the Slimes**
+# 🎮 Game Collection
 
-Willkommen! 🎮  
-Heute baust du dein eigenes kleines Browser-Spiel.
-
-Du arbeitest in **Cursor** und benutzt dabei eine **AI** als Programmier-Helfer.  
-Dieses Dokument führt dich Schritt für Schritt zum **ersten Meilenstein**:  
-> Ein einfaches, aber spielbares Spiel.
+Welcome to the Game Collection! 🎮  
+This project contains multiple browser-based games built with Kaboom.js.
 
 ---
 
-## 0. Was schon erledigt ist
+## 🎯 Project Structure
 
-- Das GitHub-Repo ist geklont.
-- Du siehst diese Datei `README.md` in **Cursor**.
-- Im Projekt gibt es schon Dateien wie zum Beispiel:
-  - `index.html`
-  - `main.js`
-
-Wenn etwas davon nicht stimmt, frag kurz nach Hilfe. 🙂
+```
+first-game/
+├── index.html              # Game selection start page
+├── minecraft-world/        # Minecraft-style dodge game
+│   ├── index.html
+│   └── main.js
+└── zombie/                 # Zombie survival game
+    ├── index.html
+    └── main.js
+```
 
 ---
 
-## 1. Cursor kennenlernen
+## 🚀 How to Play
+
+1. **Open the start page**
+   - Right-click on `index.html` in the root directory
+   - Select **"Reveal in Finder"** (or your system's file manager)
+   - Double-click on `index.html` to open it in your browser
+   - You'll see a beautiful game selection screen
+
+2. **Choose your game**
+   - Click on "Dodge the Slimes" (Minecraft World) or "Zombie Survival"
+   - The selected game will load and you can start playing!
+
+3. **Or directly open a specific game**
+   - Open `minecraft-world/index.html` for the Minecraft-style game
+   - Open `zombie/index.html` for the Zombie game
+
+---
+
+## 🎮 Available Games
+
+### 🧱 Dodge the Slimes (Minecraft World)
+A Minecraft-inspired 2D adventure game where you can:
+- Build and break blocks
+- Explore a procedurally generated world
+- Manage your inventory
+- Avoid fall damage
+- Collect resources
+
+**Controls:**
+- W/A/S/D: Move
+- SPACE: Jump
+- Q: Look down
+- E: Open inventory
+- Mouse wheel: Select hotbar slot
+- Left click: Break/place blocks
+- Right click: Use items (eat apples)
+
+### 🧟 Zombie Survival
+Fight off waves of zombies and survive as long as possible!
+
+---
+
+## 🛠️ Development
+
+This project uses:
+- **Kaboom.js** - Game development library
+- **HTML5** - Structure
+- **JavaScript** - Game logic
+- **CSS3** - Styling for the start page
+
+---
+
+---
+
+## 📝 Original Tutorial Documentation
+
+<details>
+<summary>Click to expand the original tutorial for "Dodge the Slimes"</summary>
+
+This started as a simple tutorial project. The original content is preserved here for reference.
+
+### 1. Cursor kennenlernen
 
 **Cursor** ist dein Code-Editor mit eingebauter AI-Unterstützung.
 
@@ -259,6 +319,8 @@ Das ist **normal** beim Programmieren. Ein paar Tipps:
 ## 7. Nächste Schritte (nach Meilenstein 1)
 
 Wenn du **Meilenstein 1** geschafft und einen Commit gemacht hast,  
-bekommst du von deinem „Auftraggeber“ 😉 neue Anweisungen für **Meilenstein 2**.
+bekommst du von deinem „Auftraggeber" 😉 neue Anweisungen für **Meilenstein 2**.
 
 Bis dahin: Viel Spaß beim Basteln und Ausprobieren! 🚀
+
+</details>
