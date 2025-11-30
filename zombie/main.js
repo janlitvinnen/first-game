@@ -365,6 +365,9 @@ scene("coinreward", (data) => {
 
 // Shop-Szene
 scene("shop", (data) => {
+  // DEBUG: Zeige was wir bekommen haben
+  console.log("Shop data:", data);
+  
   // Shop-Hintergrund (dunkelblau)
   add([
     rect(width(), height()),
@@ -379,6 +382,14 @@ scene("shop", (data) => {
     color(255, 215, 0),
     anchor("center"),
     z(10)
+  ]);
+  
+  // DEBUG INFO anzeigen
+  add([
+    text(`DEBUG: Level=${data.level} Münzen=${data.coins}`, { size: 14 }),
+    pos(10, 10),
+    color(255, 255, 0),
+    z(100)
   ]);
   
   // Währungsanzeige (dynamisch aktualisierbar)
@@ -415,6 +426,8 @@ scene("shop", (data) => {
   let boughtArmor = data.hasIronArmor;
   let boughtUltra = data.hasUltraSword || false;
   const nextLevel = data.level || 1;
+  
+  console.log("nextLevel:", nextLevel, "hasCoins:", hasCoins);
   
   // Shop vor Level 10: Nur goldene Äpfel
   if (nextLevel === 10) {
@@ -752,11 +765,11 @@ scene("shop", (data) => {
       hint3.color = currentCoins >= 20 ? rgb(100, 255, 100) : rgb(255, 100, 100);
     }
     
-    // Item 4: Ultra-Schwert (nur vor Level 9+)
+    // Item 4: Ultra-Schwert (nur vor Level 9+) - HÖHER POSITIONIERT!
     if (nextLevel >= 9) {
       let box4 = add([
-        rect(350, 180),
-        pos(width() / 2, height() / 2 + 250),
+        rect(300, 150),
+        pos(width() / 2 + 400, height() / 2 + 120), // NEBEN Item 3 statt darunter!
         color(60, 60, 100),
         outline(3, rgb(100, 100, 100)),
         anchor("center"),
@@ -768,24 +781,24 @@ scene("shop", (data) => {
       });
       
       add([
-        text("⚡ ULTRA-SCHWERT ⚡", { size: 20 }),
-        pos(width() / 2, height() / 2 + 190),
+        text("⚡ ULTRA-SCHWERT ⚡", { size: 18 }),
+        pos(width() / 2 + 400, height() / 2 + 60),
         color(255, 100, 255),
         anchor("center"),
         z(10)
       ]);
       
       add([
-        text("17 Herzen Schaden!", { size: 16 }),
-        pos(width() / 2, height() / 2 + 225),
+        text("17 Herzen Schaden!", { size: 14 }),
+        pos(width() / 2 + 400, height() / 2 + 95),
         color(200, 200, 200),
         anchor("center"),
         z(10)
       ]);
       
       add([
-        text("30 💰", { size: 20 }),
-        pos(width() / 2, height() / 2 + 260),
+        text("30 💰", { size: 18 }),
+        pos(width() / 2 + 400, height() / 2 + 125),
         color(255, 215, 0),
         anchor("center"),
         z(10)
@@ -794,8 +807,8 @@ scene("shop", (data) => {
       let hint4 = null;
       if (boughtUltra) {
         hint4 = add([
-          text("✓ GEKAUFT", { size: 16 }),
-          pos(width() / 2, height() / 2 + 300),
+          text("✓ GEKAUFT", { size: 14 }),
+          pos(width() / 2 + 400, height() / 2 + 160),
           color(100, 255, 100),
           anchor("center"),
           z(10),
@@ -803,8 +816,8 @@ scene("shop", (data) => {
         ]);
       } else {
         hint4 = add([
-          text("", { size: 16 }),
-          pos(width() / 2, height() / 2 + 300),
+          text("", { size: 14 }),
+          pos(width() / 2 + 400, height() / 2 + 160),
           color(255, 100, 100),
           anchor("center"),
           z(10),
@@ -821,7 +834,9 @@ scene("shop", (data) => {
     
     // Kauf-Logik für Münz-Shop
     onKeyPress("1", () => {
+      console.log("Taste 1 gedrückt! boughtNetherite:", boughtNetherite, "currentCoins:", currentCoins);
       if (!boughtNetherite && currentCoins >= 20) {
+        console.log("Kaufe Netherite-Schwert!");
         boughtNetherite = true;
         currentCoins -= 20;
         // Button aktualisieren
@@ -838,7 +853,9 @@ scene("shop", (data) => {
     });
     
     onKeyPress("2", () => {
+      console.log("Taste 2 gedrückt! currentCoins:", currentCoins);
       if (currentCoins >= 5) {
+        console.log("Kaufe Apfel!");
         currentCoins -= 5;
         currentApples++;
         // Temporäre Bestätigung
@@ -854,7 +871,9 @@ scene("shop", (data) => {
     });
     
     onKeyPress("3", () => {
+      console.log("Taste 3 gedrückt! boughtArmor:", boughtArmor, "currentCoins:", currentCoins);
       if (!boughtArmor && currentCoins >= 20) {
+        console.log("Kaufe Eisenrüstung!");
         boughtArmor = true;
         currentCoins -= 20;
         // Button aktualisieren
@@ -873,7 +892,9 @@ scene("shop", (data) => {
     // Ultra-Schwert Kauf (nur wenn verfügbar)
     if (nextLevel >= 9) {
       onKeyPress("4", () => {
+        console.log("Taste 4 gedrückt! boughtUltra:", boughtUltra, "currentCoins:", currentCoins);
         if (!boughtUltra && currentCoins >= 30) {
+          console.log("Kaufe Ultra-Schwert!");
           boughtUltra = true;
           currentCoins -= 30;
           // Button aktualisieren
@@ -900,7 +921,22 @@ scene("shop", (data) => {
     z(10)
   ]);
   
+  // DEBUG: Test ob Tasteneingaben funktionieren
+  const debugText = add([
+    text("Taste gedrückt: -", { size: 16 }),
+    pos(10, height() - 30),
+    color(255, 255, 0),
+    z(100)
+  ]);
+  
+  onKeyPress(() => {
+    debugText.text = `Taste gedrückt: ${Math.random().toFixed(2)}`;
+    console.log("Irgendeine Taste wurde gedrückt!");
+  });
+  
   onKeyPress("enter", () => {
+    console.log("ENTER wurde gedrückt im Shop!");
+    debugText.text = "ENTER gedrückt!";
     go("game", {
       level: data.level,
       playerHealth: data.playerHealth,
