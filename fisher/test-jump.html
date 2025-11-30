@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sprung Test</title>
+  <script src="https://unpkg.com/kaboom/dist/kaboom.js"></script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div style="padding: 20px; font-family: Arial;">
+    <h2>Sprung Test</h2>
+    <p>Drücke verschiedene Tasten und schau in die Konsole (F12):</p>
+    <ul>
+      <li><strong>Pfeil nach oben (↑)</strong> - sollte "Sprung versucht!" anzeigen</li>
+      <li><strong>W</strong> - alternative Sprungtaste</li>
+      <li><strong>Leertaste</strong> - alternative Sprungtaste</li>
+    </ul>
+    <div id="status" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+      <strong>Status:</strong> <span id="status-text">Warte auf Eingabe...</span>
+    </div>
+  </div>
+  
+  <script>
+    kaboom({
+      canvas: document.querySelector("#game"),
+      width: 800,
+      height: 400,
+      background: [100, 180, 255],
+    });
+
+    const statusText = document.getElementById("status-text");
+
+    loadSprite("bear", "https://img.icons8.com/color/96/000000/bear.png");
+
+    scene("test", () => {
+      const GROUND_Y = height() - 60;
+      
+      // Debug-Anzeige
+      const debugText = add([
+        text("", { size: 20 }),
+        pos(10, 10),
+        color(255, 255, 255),
+        z(100),
+      ]);
+
+      const bear = add([
+        sprite("bear"),
+        pos(width() / 2, GROUND_Y),
+        area(),
+        anchor("center"),
+        scale(1.5),
+        "bear",
+        {
+          isJumping: false,
+          jumpSpeed: 0,
+          gravity: 1200,
+        }
+      ]);
+
+      // Boden-Linie zum Visualisieren
+      add([
+        rect(width(), 3),
+        pos(0, GROUND_Y),
+        color(255, 0, 0),
+        z(-1),
+      ]);
+
+      bear.onUpdate(() => {
+        // Debug-Info aktualisieren
+        debugText.text = `Y-Position: ${Math.round(bear.pos.y)}\nGround: ${GROUND_Y}\nSpringt: ${bear.isJumping}\nSpeed: ${Math.round(bear.jumpSpeed)}`;
+        
+        // Gravitation
+        if (bear.pos.y < GROUND_Y) {
+          bear.jumpSpeed += bear.gravity * dt();
+          bear.pos.y += bear.jumpSpeed * dt();
+        } else {
+          bear.pos.y = GROUND_Y;
+          bear.jumpSpeed = 0;
+          bear.isJumping = false;
+        }
+      });
+
+      // Links/Rechts
+      onKeyDown("left", () => bear.move(-300, 0));
+      onKeyDown("right", () => bear.move(300, 0));
+
+      // TEST 1: Pfeil nach oben
+      onKeyPress("up", () => {
+        console.log("UP Taste gedrückt!");
+        statusText.textContent = "UP Taste erkannt!";
+        
+        if (!bear.isJumping && bear.pos.y >= GROUND_Y - 5) {
+          console.log("✅ SPRUNG AUSGEFÜHRT!");
+          statusText.textContent = "✅ Sprung ausgeführt!";
+          bear.isJumping = true;
+          bear.jumpSpeed = -500;
+        } else {
+          console.log("❌ Sprung blockiert - isJumping:", bear.isJumping, "pos.y:", bear.pos.y, "ground:", GROUND_Y);
+          statusText.textContent = `❌ Sprung blockiert (Jumping: ${bear.isJumping}, Y: ${Math.round(bear.pos.y)})`;
+        }
+      });
+
+      // TEST 2: W-Taste (Alternative)
+      onKeyPress("w", () => {
+        console.log("W Taste gedrückt!");
+        statusText.textContent = "W Taste erkannt!";
+        
+        if (!bear.isJumping && bear.pos.y >= GROUND_Y - 5) {
+          console.log("✅ SPRUNG MIT W!");
+          statusText.textContent = "✅ Sprung mit W!";
+          bear.isJumping = true;
+          bear.jumpSpeed = -500;
+        }
+      });
+
+      // TEST 3: Leertaste (Alternative)
+      onKeyPress("space", () => {
+        console.log("Leertaste gedrückt!");
+        statusText.textContent = "Leertaste erkannt!";
+        
+        if (!bear.isJumping && bear.pos.y >= GROUND_Y - 5) {
+          console.log("✅ SPRUNG MIT SPACE!");
+          statusText.textContent = "✅ Sprung mit Leertaste!";
+          bear.isJumping = true;
+          bear.jumpSpeed = -500;
+        }
+      });
+
+      // Anleitung
+      add([
+        text("Drücke ↑, W oder LEERTASTE zum Springen\n← → zum Bewegen", {
+          size: 24,
+          align: "center",
+        }),
+        pos(width() / 2, height() / 2 + 80),
+        color(255, 255, 255),
+        anchor("center"),
+      ]);
+    });
+
+    go("test");
+  </script>
+</body>
+</html>
+
