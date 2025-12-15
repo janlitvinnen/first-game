@@ -156,6 +156,21 @@
       color: #0277BD;
     }
 
+    .goalie-card {
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+      color: white;
+    }
+
+    .goalie-card .game-title,
+    .goalie-card .game-description {
+      color: white;
+    }
+
+    .goalie-card .play-button {
+      background: white;
+      color: #27ae60;
+    }
+
     @keyframes fadeInDown {
       from {
         opacity: 0;
@@ -243,6 +258,17 @@
         <div class="game-description">
           Fange die Fische, die vom Wasserfall herunterfallen! 
           Steuere den Bären mit den Pfeiltasten und sammle Punkte.
+        </div>
+        <button class="play-button">Play Now</button>
+      </a>
+
+      <!-- Goalie Game -->
+      <a href="./goalie/index.html" class="game-card goalie-card">
+        <div class="game-icon">⚽</div>
+        <div class="game-title">Goalie</div>
+        <div class="game-description">
+          Sei der beste Torwart! Der Stürmer schießt langsam und du musst reagieren.
+          Bewege dich mit den Pfeiltasten und halte so viele Bälle wie möglich!
         </div>
         <button class="play-button">Play Now</button>
       </a>

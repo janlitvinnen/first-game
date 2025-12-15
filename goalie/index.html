@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Goalie - Torwart Spiel</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #game {
+      border: 4px solid white;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+    }
+
+    .info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .info h2 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+
+    .info p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="info">
+    <h2>⚽ Goalie</h2>
+    <p><strong>Steuerung:</strong></p>
+    <p>← → Pfeiltasten: Torwart bewegen</p>
+    <p><strong>Ziel:</strong> Halte so viele Bälle wie möglich!</p>
+  </div>
+  
+  <canvas id="game"></canvas>
+
+  <!-- Kaboom.js laden -->
+  <script src="https://unpkg.com/kaboom@3000.0.1/dist/kaboom.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
+
+
