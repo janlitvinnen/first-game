@@ -40,7 +40,7 @@ const questions = [
     ],
     correct: 0, // Index 0 = Ja
     showHintAfter: true, // Show special hint after this question
-    hintMessage: "🎮 Schau bei Litvinovs PS und du siehst einen Code! 🎮"
+    hintMessage: "🎮 Schau bei Litvinovs PS5 und du siehst einen Code! 🎮"
   },
   {
     type: "text", // Text input question
