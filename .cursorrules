@@ -1,0 +1,55 @@
+# Cursor Rules for First-Game Project
+
+## Local Development Server
+
+This project contains multiple HTML/JavaScript games that need to be served over HTTP for proper testing.
+
+### Server Configuration
+- **Port**: 8081
+- **Server**: Python3 HTTP server
+- **Command**: `python3 -m http.server 8081`
+
+### Testing Protocol
+
+When making changes to any game files or when asked to test functionality:
+
+1. **Check for Running Server**: Before starting a new server, check if one is already running on port 8081 by listing the terminals folder.
+
+2. **Start Server** (if not running): 
+   - Run `python3 -m http.server 8081` in a background terminal
+   - The server should remain running in the background
+   - Games will be accessible at `http://localhost:8081/`
+
+3. **Access Points**:
+   - Main menu: `http://localhost:8081/index.html`
+   - Minecraft/Slimes game: `http://localhost:8081/minecraft-world/index.html`
+   - Zombie game: `http://localhost:8081/zombie/index.html`
+   - Fisher game: `http://localhost:8081/fisher/index.html`
+   - Goalie game: `http://localhost:8081/goalie/index.html`
+
+4. **Testing Workflow**:
+   - After making changes to HTML/JS/CSS files, navigate to the appropriate URL
+   - Use browser snapshot to verify the page loaded correctly
+   - Interact with game elements to test functionality
+   - Check console messages for errors if needed
+   - Take screenshots when visual verification is important
+
+5. **When to Test**:
+   - After implementing new game features
+   - After fixing bugs
+   - After making UI/styling changes
+   - When explicitly asked to test or verify functionality
+   - Before concluding major feature implementations
+
+### Project Structure
+- Each game is in its own folder with `index.html` and `main.js`
+- Root `index.html` is the game selection menu
+- All games use Kaboom.js library
+
+### Common Testing Scenarios
+- Game mechanics (movement, collision, scoring)
+- UI elements and responsiveness
+- Game state management (start, pause, game over)
+- Visual effects and animations
+- Cross-browser compatibility
+

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎅 Wichtel-Quiz von Santa</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #d63031 0%, #b71c1c 50%, #2d5016 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Schneeflockenhintergrund */
+    body::before {
+      content: '❄️ ❄️ ❄️ ❄️ ❄️ ❄️ ❄️ ❄️ ❄️ ❄️';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      font-size: 2rem;
+      color: rgba(255, 255, 255, 0.8);
+      animation: snowfall 10s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes snowfall {
+      0% { transform: translateY(-100px); }
+      100% { transform: translateY(100vh); }
+    }
+
+    .container {
+      max-width: 700px;
+      width: 100%;
+      background: white;
+      border-radius: 25px;
+      padding: 3rem;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+      position: relative;
+      z-index: 1;
+      animation: slideIn 0.8s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      color: #d63031;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .santa-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      display: block;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .quiz-section {
+      display: none;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .quiz-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .question-container {
+      margin: 2rem 0;
+    }
+
+    .question {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .option {
+      background: #f8f9fa;
+      padding: 1rem 1.5rem;
+      border-radius: 15px;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+    }
+
+    .option:hover {
+      background: #e9ecef;
+      border-color: #d63031;
+      transform: translateX(5px);
+    }
+
+    .option.selected {
+      background: #d63031;
+      color: white;
+      border-color: #b71c1c;
+    }
+
+    .option.correct {
+      background: #2d5016;
+      color: white;
+      border-color: #1a2f0b;
+    }
+
+    .option.wrong {
+      background: #666;
+      color: white;
+      opacity: 0.5;
+    }
+
+    .text-answer-container {
+      margin: 1.5rem 0;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 1.2rem 1.5rem;
+      font-size: 1.2rem;
+      border: 3px solid #e9ecef;
+      border-radius: 15px;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .text-input:focus {
+      outline: none;
+      border-color: #d63031;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(214, 48, 49, 0.1);
+    }
+
+    .text-input.correct-input {
+      border-color: #2d5016;
+      background: #e8f5e9;
+      color: #2d5016;
+      font-weight: bold;
+    }
+
+    .text-input.wrong-input {
+      border-color: #d63031;
+      background: #ffebee;
+      color: #d63031;
+    }
+
+    .button-container {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #d63031 0%, #b71c1c 100%);
+      color: white;
+      padding: 1rem 2.5rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(214, 48, 49, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #e9ecef;
+      border-radius: 5px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2d5016 0%, #4a7e23 100%);
+      transition: width 0.5s ease;
+    }
+
+    .final-message {
+      text-align: center;
+      padding: 2rem 0;
+    }
+
+    .final-message h2 {
+      color: #2d5016;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .secret-location {
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+      padding: 2rem;
+      border-radius: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+      margin: 2rem 0;
+      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+      border: 3px solid #ffc107;
+    }
+
+    .tree-icon {
+      font-size: 3rem;
+      margin: 1rem 0;
+      display: block;
+    }
+
+    #start-screen {
+      text-align: center;
+    }
+
+    #start-screen .intro-text {
+      margin: 2rem 0;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #555;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 2rem 1.5rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .santa-icon {
+        font-size: 3rem;
+      }
+
+      .question {
+        font-size: 1.1rem;
+      }
+
+      .option {
+        font-size: 1rem;
+        padding: 0.8rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Start Screen -->
+    <div id="start-screen" class="quiz-section active">
+      <div class="header">
+        <span class="santa-icon">🎅</span>
+        <h1>Santas Wichtel-Quiz</h1>
+        <p class="subtitle">Beantworte die Fragen und finde heraus, wo Santa dein Geschenk versteckt hat!</p>
+      </div>
+      <div class="intro-text">
+        <p>🎄 Willkommen zu Santas geheimem Quiz! 🎁</p>
+        <p style="margin-top: 1rem;">
+          Santa hat ein besonderes Geschenk für dich versteckt. Um herauszufinden, 
+          wo es sich befindet, musst du alle Fragen richtig beantworten.
+        </p>
+        <p style="margin-top: 1rem;">
+          Bist du bereit für die Herausforderung?
+        </p>
+      </div>
+      <div class="button-container">
+        <button class="btn" onclick="startQuiz()">Quiz Starten</button>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" class="quiz-section">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+
+      <div class="question-container" id="question-container">
+        <!-- Questions will be dynamically inserted here -->
+      </div>
+
+      <div class="button-container">
+        <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>
+          Nächste Frage
+        </button>
+      </div>
+    </div>
+
+    <!-- Hint Screen (after question 4) -->
+    <div id="hint-screen" class="quiz-section">
+      <div class="final-message">
+        <span class="tree-icon">🎁</span>
+        <h2>Wichtiger Hinweis!</h2>
+        <div class="secret-location" id="hint-message" style="font-size: 1.3rem;">
+          <!-- Hint message will be inserted here -->
+        </div>
+        <p style="margin-top: 2rem; color: #666;">
+          Merke dir diesen Hinweis gut! 📝
+        </p>
+      </div>
+      <div class="button-container">
+        <button class="btn" onclick="continueToNextQuestion()">
+          Weiter zur nächsten Frage
+        </button>
+      </div>
+    </div>
+
+    <!-- Fail Screen -->
+    <div id="fail-screen" class="quiz-section">
+      <div class="final-message">
+        <span class="tree-icon">❌</span>
+        <h2 style="color: #d63031;">Du bist nicht der Richtige!</h2>
+        <p style="margin: 2rem 0; font-size: 1.3rem; color: #333; font-weight: bold;">
+          Du bekommst das Geschenk nicht!
+        </p>
+        <div style="background: linear-gradient(135deg, #d63031 0%, #b71c1c 100%); padding: 2rem; border-radius: 20px; margin: 2rem 0;">
+          <p style="color: white; font-size: 1.2rem; margin: 0;">
+            🚫 Falsche Antwort! 🚫
+          </p>
+        </div>
+        <p style="color: #666; margin-top: 2rem;">
+          Nur der richtige Empfänger kann alle Fragen richtig beantworten.
+        </p>
+      </div>
+      <div class="button-container">
+        <button class="btn" onclick="location.reload()">
+          Nochmal versuchen
+        </button>
+      </div>
+    </div>
+
+    <!-- Final Screen -->
+    <div id="final-screen" class="quiz-section">
+      <div class="final-message">
+        <span class="tree-icon">🎄</span>
+        <h2>Herzlichen Glückwunsch! 🎉</h2>
+        <p style="margin: 1rem 0; font-size: 1.1rem; color: #555;">
+          Du hast alle Fragen richtig beantwortet!
+        </p>
+        <p style="font-size: 1.2rem; color: #333; margin-bottom: 2rem;">
+          Santa verrät dir jetzt das Geheimnis...
+        </p>
+        
+        <div class="secret-location" id="secret-location">
+          🎁 Dein Geschenk findest du... 🎁
+          <br><br>
+          <span style="font-size: 2rem;">📍 [HIER KOMMT DIE GEHEIME NACHRICHT]</span>
+        </div>
+
+        <p style="margin-top: 2rem; color: #666;">
+          🎅 Frohe Weihnachten! 🎄
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="./main.js"></script>
+</body>
+</html>
+
