@@ -6,7 +6,7 @@ kaboom({
   background: [20, 30, 60], // Nacht-Himmel
 });
 
-// CHEAT-CODE: OP drücken für direkten Shop-Zugang mit Livehack!
+// ЧИТ-КОД: Нажмите OP для прямого доступа к магазину с бонусами!
 let cheatBuffer = "";
 let lastKeyTime = 0;
 
@@ -51,21 +51,21 @@ document.addEventListener("keydown", (event) => {
 // Game Over Szene
 scene("gameover", () => {
   add([
-    text("GAME OVER", { size: 48 }),
+    text("ИГРА ОКОНЧЕНА", { size: 48 }),
     pos(width() / 2, height() / 2 - 50),
     color(255, 0, 0),
     anchor("center")
   ]);
   
   add([
-    text("Die Zombies haben gewonnen!", { size: 24 }),
+    text("Зомби победили!", { size: 24 }),
     pos(width() / 2, height() / 2 + 20),
     color(255, 255, 255),
     anchor("center")
   ]);
   
   add([
-    text("Drücke ENTER zum Neustart", { size: 20 }),
+    text("Нажмите ENTER для перезапуска", { size: 20 }),
     pos(width() / 2, height() / 2 + 80),
     color(200, 200, 200),
     anchor("center")
@@ -80,31 +80,31 @@ scene("gameover", () => {
 scene("victory", (data) => {
   const currentLevel = data.currentLevel || 1;
   const nextLevel = currentLevel + 1;
-  const hasNextLevel = nextLevel <= 10; // Aktuell 10 Levels!
+  const hasNextLevel = nextLevel <= 7; // Nur 7 Levels!
   
   add([
-    text("LEVEL GESCHAFFT!", { size: 48 }),
+    text("УРОВЕНЬ ПРОЙДЕН!", { size: 48 }),
     pos(width() / 2, height() / 2 - 80),
     color(100, 255, 100),
     anchor("center")
   ]);
   
   add([
-    text(`Level ${currentLevel} abgeschlossen!`, { size: 24 }),
+    text(`Уровень ${currentLevel} завершен!`, { size: 24 }),
     pos(width() / 2, height() / 2 - 20),
     color(255, 255, 255),
     anchor("center")
   ]);
   
   add([
-    text(`Verbleibende Leben: ${Math.ceil(data.playerHealth)} ♥`, { size: 20 }),
+    text(`Осталось жизней: ${Math.ceil(data.playerHealth)} ♥`, { size: 20 }),
     pos(width() / 2, height() / 2 + 20),
     color(255, 100, 100),
     anchor("center")
   ]);
   
   add([
-    text(`Goldene Äpfel: ${data.goldenApples} 🍎`, { size: 20 }),
+    text(`Золотые яблоки: ${data.goldenApples} 🍎`, { size: 20 }),
     pos(width() / 2, height() / 2 + 50),
     color(255, 215, 0),
     anchor("center")
@@ -112,7 +112,7 @@ scene("victory", (data) => {
   
   if (hasNextLevel) {
     add([
-      text(`Drücke ENTER für Level ${nextLevel}`, { size: 24 }),
+      text(`Нажмите ENTER для уровня ${nextLevel}`, { size: 24 }),
       pos(width() / 2, height() / 2 + 100),
       color(100, 255, 100),
       anchor("center")
@@ -122,34 +122,25 @@ scene("victory", (data) => {
     let infoColor = rgb(200, 200, 200);
     
     if (nextLevel === 2) {
-      levelInfo = "5 Zombies mit je 7,5 ♥";
+      levelInfo = "5 зомби по 7,5 ♥";
     } else if (nextLevel === 3) {
-      levelInfo = "10 Zombies mit je 10 ♥";
+      levelInfo = "10 зомби по 10 ♥";
       if (data.goldenApples >= 11) {
-        levelInfo += " - SCHWERT-UPGRADE! ⚔✨";
+        levelInfo += " - УЛУЧШЕНИЕ МЕЧА! ⚔✨";
         infoColor = rgb(255, 215, 0);
       }
     } else if (nextLevel === 4) {
-      levelInfo = "⚠️ BOSS-KAMPF! 50 ♥ ⚠️";
+      levelInfo = "⚠️ БОЙ С БОССОМ! 50 ♥ ⚠️";
       infoColor = rgb(255, 50, 50); // Rot für Boss!
     } else if (nextLevel === 5) {
-      levelInfo = "2 Super-Zombies mit je 25 ♥";
+      levelInfo = "2 супер-зомби по 25 ♥";
       infoColor = rgb(255, 100, 100);
     } else if (nextLevel === 6) {
-      levelInfo = "5 Starke Zombies mit je 40 ♥";
+      levelInfo = "5 сильных зомби по 40 ♥";
       infoColor = rgb(255, 80, 80);
     } else if (nextLevel === 7) {
-      levelInfo = "⚠️ BOSS-KAMPF! 200 ♥ ⚠️";
+      levelInfo = "⚠️ ФИНАЛЬНЫЙ БОСС! 200 ♥ ⚠️";
       infoColor = rgb(255, 0, 0); // Sehr rot!
-    } else if (nextLevel === 8) {
-      levelInfo = "5 Mega-Zombies mit je 100 ♥";
-      infoColor = rgb(255, 50, 50);
-    } else if (nextLevel === 9) {
-      levelInfo = "7 Ultra-Zombies mit je 150 ♥";
-      infoColor = rgb(255, 30, 30);
-    } else if (nextLevel === 10) {
-      levelInfo = "⚠️ FINAL BOSS! 350 ♥ ⚠️";
-      infoColor = rgb(200, 0, 0); // Dunkelrot für Final Boss!
     }
     
     add([
@@ -189,28 +180,14 @@ scene("victory", (data) => {
           hasUltraSword: data.hasUltraSword || false
         });
       }
-      // Level 7-9: 50 Münzen Belohnung
-      else if (nextLevel >= 7 && nextLevel <= 9) {
+      // Level 7: 50 Münzen Belohnung und Shop vor Final Boss
+      else if (nextLevel === 7) {
         go("coinreward", {
           level: nextLevel,
           playerHealth: data.playerHealth,
           goldenApples: data.goldenApples,
           coins: (data.coins || 0) + 50,
           previousCoins: data.coins || 0, // Für Anzeige
-          hasShield: data.hasShield || false,
-          hasDiamondSword: data.hasDiamondSword || false,
-          hasNetheriteSword: data.hasNetheriteSword || false,
-          hasIronArmor: data.hasIronArmor || false,
-          hasUltraSword: data.hasUltraSword || false
-        });
-      }
-      // Level 10: Shop vor Final Boss
-      else if (nextLevel === 10) {
-        go("shop", {
-          level: nextLevel,
-          playerHealth: data.playerHealth,
-          goldenApples: data.goldenApples,
-          coins: (data.coins || 0) + 50, // 50 Münzen von Level 9
           hasShield: data.hasShield || false,
           hasDiamondSword: data.hasDiamondSword || false,
           hasNetheriteSword: data.hasNetheriteSword || false,
@@ -237,35 +214,35 @@ scene("victory", (data) => {
     // Boss besiegt - Schild-Belohnung!
     if (currentLevel === 4) {
       add([
-        text("🏆 BOSS BESIEGT! 🏆", { size: 48 }),
+        text("🏆 БОСС ПОБЕЖДЕН! 🏆", { size: 48 }),
         pos(width() / 2, height() / 2 - 60),
         color(255, 215, 0),
         anchor("center")
       ]);
       
       add([
-        text("🛡️ SCHILD ERHALTEN! 🛡️", { size: 36 }),
+        text("🛡️ ЩИТ ПОЛУЧЕН! 🛡️", { size: 36 }),
         pos(width() / 2, height() / 2 + 10),
         color(100, 200, 255),
         anchor("center")
       ]);
       
       add([
-        text("Drücke SHIFT um dich zu schützen!", { size: 20 }),
+        text("Нажмите SHIFT для защиты!", { size: 20 }),
         pos(width() / 2, height() / 2 + 50),
         color(200, 200, 200),
         anchor("center")
       ]);
       
       add([
-        text(`Leben: ${Math.ceil(data.playerHealth)} ♥  |  Äpfel: ${data.goldenApples} 🍎`, { size: 18 }),
+        text(`Жизни: ${Math.ceil(data.playerHealth)} ♥  |  Яблоки: ${data.goldenApples} 🍎`, { size: 18 }),
         pos(width() / 2, height() / 2 + 90),
         color(255, 255, 255),
         anchor("center")
       ]);
       
       add([
-        text("Drücke ENTER für Level 5", { size: 24 }),
+        text("Нажмите ENTER для уровня 5", { size: 24 }),
         pos(width() / 2, height() / 2 + 140),
         color(100, 255, 100),
         anchor("center")
@@ -283,21 +260,21 @@ scene("victory", (data) => {
     } else {
       // Spiel komplett gewonnen!
       add([
-        text("🎉 SPIEL GEWONNEN! 🎉", { size: 48 }),
+        text("🎉 ИГРА ВЫИГРАНА! 🎉", { size: 48 }),
         pos(width() / 2, height() / 2 + 90),
         color(255, 215, 0),
         anchor("center")
       ]);
       
       add([
-        text("Du hast alle Levels geschafft!", { size: 28 }),
+        text("Вы прошли все уровни!", { size: 28 }),
         pos(width() / 2, height() / 2 + 140),
         color(100, 255, 100),
         anchor("center")
       ]);
       
       add([
-        text("Drücke ENTER zum Neustart", { size: 20 }),
+        text("Нажмите ENTER для перезапуска", { size: 20 }),
         pos(width() / 2, height() / 2 + 180),
         color(200, 200, 200),
         anchor("center")
@@ -321,7 +298,7 @@ scene("coinreward", (data) => {
   ]);
   
   add([
-    text("🎉 BELOHNUNG! 🎉", { size: 48 }),
+    text("🎉 НАГРАДА! 🎉", { size: 48 }),
     pos(width() / 2, height() / 2 - 80),
     color(255, 215, 0),
     anchor("center")
@@ -331,7 +308,7 @@ scene("coinreward", (data) => {
   const coinsReceived = data.coins - (data.previousCoins || 0);
   
   add([
-    text(`Du hast ${coinsReceived} Münzen erhalten!`, { size: 32 }),
+    text(`Вы получили ${coinsReceived} монет!`, { size: 32 }),
     pos(width() / 2, height() / 2 - 10),
     color(255, 255, 100),
     anchor("center")
@@ -345,14 +322,14 @@ scene("coinreward", (data) => {
   ]);
   
   add([
-    text(`Münzen: ${data.coins} 💰`, { size: 28 }),
+    text(`Монеты: ${data.coins} 💰`, { size: 28 }),
     pos(width() / 2, height() / 2 + 120),
     color(255, 255, 255),
     anchor("center")
   ]);
   
   add([
-    text("Drücke ENTER für den LADEN", { size: 24 }),
+    text("Нажмите ENTER для МАГАЗИНА", { size: 24 }),
     pos(width() / 2, height() - 80),
     color(100, 255, 100),
     anchor("center")
@@ -377,7 +354,7 @@ scene("shop", (data) => {
   ]);
   
   add([
-    text("🏪 LADEN 🏪", { size: 48 }),
+    text("🏪 МАГАЗИН 🏪", { size: 48 }),
     pos(width() / 2, 40),
     color(255, 215, 0),
     anchor("center"),
@@ -408,12 +385,12 @@ scene("shop", (data) => {
       "currency-display"
     ]);
     currencyDisplay.onUpdate(() => {
-      currencyDisplay.text = `Münzen: ${currentCoins} 💰  |  Äpfel: ${currentApples} 🍎`;
+      currencyDisplay.text = `Монеты: ${currentCoins} 💰  |  Яблоки: ${currentApples} 🍎`;
     });
-    currencyDisplay.text = `Münzen: ${currentCoins} 💰  |  Äpfel: ${currentApples} 🍎`;
+    currencyDisplay.text = `Монеты: ${currentCoins} 💰  |  Яблоки: ${currentApples} 🍎`;
   } else {
     currencyDisplay = add([
-      text(`Goldene Äpfel: ${currentApples} 🍎`, { size: 22 }),
+      text(`Золотые яблоки: ${currentApples} 🍎`, { size: 22 }),
       pos(width() / 2, 90),
       color(255, 255, 255),
       anchor("center"),
@@ -442,7 +419,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text("🍎 GOLDENER APFEL", { size: 32 }),
+      text("🍎 ЗОЛОТОЕ ЯБЛОКО", { size: 32 }),
       pos(width() / 2, height() / 2 - 70),
       color(255, 215, 0),
       anchor("center"),
@@ -450,7 +427,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text("Heilt 2 Herzen", { size: 18 }),
+      text("Восстанавливает 2 сердца", { size: 18 }),
       pos(width() / 2, height() / 2 - 30),
       color(200, 200, 200),
       anchor("center"),
@@ -458,7 +435,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text("5 💰 (mehrfach kaufbar)", { size: 20 }),
+      text("5 💰 (можно купить несколько)", { size: 20 }),
       pos(width() / 2, height() / 2 + 10),
       color(255, 215, 0),
       anchor("center"),
@@ -467,7 +444,7 @@ scene("shop", (data) => {
     
     if (currentCoins >= 5) {
       add([
-        text("Drücke K zum KAUFEN", { size: 22 }),
+        text("Нажмите K чтобы КУПИТЬ", { size: 22 }),
         pos(width() / 2, height() / 2 + 60),
         color(100, 255, 100),
         anchor("center"),
@@ -476,7 +453,7 @@ scene("shop", (data) => {
       ]);
     } else {
       add([
-        text("❌ NICHT GENUG MÜNZEN", { size: 20 }),
+        text("❌ НЕДОСТАТОЧНО МОНЕТ", { size: 20 }),
         pos(width() / 2, height() / 2 + 60),
         color(255, 100, 100),
         anchor("center"),
@@ -490,7 +467,7 @@ scene("shop", (data) => {
         currentApples++;
         destroyAll("buy-hint");
         add([
-          text("✓ GEKAUFT! Drücke ENTER...", { size: 22 }),
+          text("✓ КУПЛЕНО! Нажмите ENTER...", { size: 22 }),
           pos(width() / 2, height() / 2 + 60),
           color(100, 255, 100),
           anchor("center"),
@@ -515,7 +492,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text("💎 DIAMANTSCHWERT", { size: 32 }),
+      text("💎 АЛМАЗНЫЙ МЕЧ", { size: 32 }),
       pos(width() / 2, height() / 2 - 70),
       color(100, 200, 255),
       anchor("center"),
@@ -523,7 +500,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text("Macht 6 Herzen Schaden!", { size: 18 }),
+      text("Наносит 6 сердец урона!", { size: 18 }),
       pos(width() / 2, height() / 2 - 30),
       color(200, 200, 200),
       anchor("center"),
@@ -531,7 +508,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text(`Preis: ${diamondPrice} 🍎`, { size: 24 }),
+      text(`Цена: ${diamondPrice} 🍎`, { size: 24 }),
       pos(width() / 2, height() / 2 + 10),
       color(255, 215, 0),
       anchor("center"),
@@ -540,7 +517,7 @@ scene("shop", (data) => {
     
     if (boughtDiamond) {
       add([
-        text("✓ BEREITS GEKAUFT", { size: 20 }),
+        text("✓ УЖЕ КУПЛЕНО", { size: 20 }),
         pos(width() / 2, height() / 2 + 60),
         color(100, 255, 100),
         anchor("center"),
@@ -548,7 +525,7 @@ scene("shop", (data) => {
       ]);
     } else if (canBuy) {
       add([
-        text("Drücke K zum KAUFEN", { size: 22 }),
+        text("Нажмите K чтобы КУПИТЬ", { size: 22 }),
         pos(width() / 2, height() / 2 + 60),
         color(100, 255, 100),
         anchor("center"),
@@ -557,7 +534,7 @@ scene("shop", (data) => {
       ]);
     } else {
       add([
-        text("❌ NICHT GENUG ÄPFEL", { size: 20 }),
+        text("❌ НЕДОСТАТОЧНО ЯБЛОК", { size: 20 }),
         pos(width() / 2, height() / 2 + 60),
         color(255, 100, 100),
         anchor("center"),
@@ -572,7 +549,7 @@ scene("shop", (data) => {
         
         destroyAll("buy-hint");
         add([
-          text("✓ GEKAUFT! Drücke ENTER...", { size: 22 }),
+          text("✓ КУПЛЕНО! Нажмите ENTER...", { size: 22 }),
           pos(width() / 2, height() / 2 + 60),
           color(100, 255, 100),
           anchor("center"),
@@ -597,7 +574,7 @@ scene("shop", (data) => {
     });
     
     add([
-      text("🔥 NETHERITE-SCHWERT", { size: 20 }),
+      text("🔥 НЕЗЕРИТОВЫЙ МЕЧ", { size: 20 }),
       pos(width() / 2 - 400, height() / 2 - 60),
       color(200, 50, 50),
       anchor("center"),
@@ -605,7 +582,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text("10 Herzen Schaden!", { size: 16 }),
+      text("10 сердец урона!", { size: 16 }),
       pos(width() / 2 - 400, height() / 2 - 25),
       color(200, 200, 200),
       anchor("center"),
@@ -623,7 +600,7 @@ scene("shop", (data) => {
     let hint1 = null;
     if (boughtNetherite) {
       hint1 = add([
-        text("✓ GEKAUFT", { size: 16 }),
+        text("✓ КУПЛЕНО", { size: 16 }),
         pos(width() / 2 - 400, height() / 2 + 50),
         color(100, 255, 100),
         anchor("center"),
@@ -640,10 +617,10 @@ scene("shop", (data) => {
         "hint1"
       ]);
       hint1.onUpdate(() => {
-        hint1.text = currentCoins >= 20 ? "[1] KAUFEN" : "ZU TEUER";
+        hint1.text = currentCoins >= 20 ? "[1] КУПИТЬ" : "СЛИШКОМ ДОРОГО";
         hint1.color = currentCoins >= 20 ? rgb(100, 255, 100) : rgb(255, 100, 100);
       });
-      hint1.text = currentCoins >= 20 ? "[1] KAUFEN" : "ZU TEUER";
+      hint1.text = currentCoins >= 20 ? "[1] КУПИТЬ" : "СЛИШКОМ ДОРОГО";
       hint1.color = currentCoins >= 20 ? rgb(100, 255, 100) : rgb(255, 100, 100);
     }
     
@@ -662,7 +639,7 @@ scene("shop", (data) => {
     });
     
     add([
-      text("🍎 GOLDENER APFEL", { size: 20 }),
+      text("🍎 ЗОЛОТОЕ ЯБЛОКО", { size: 20 }),
       pos(width() / 2, height() / 2 - 60),
       color(255, 215, 0),
       anchor("center"),
@@ -670,7 +647,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text("Heilt 2 Herzen", { size: 16 }),
+      text("Восстанавливает 2 сердца", { size: 16 }),
       pos(width() / 2, height() / 2 - 25),
       color(200, 200, 200),
       anchor("center"),
@@ -678,7 +655,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text("5 💰 (mehrfach kaufbar)", { size: 16 }),
+      text("5 💰 (можно купить несколько)", { size: 16 }),
       pos(width() / 2, height() / 2 + 10),
       color(255, 215, 0),
       anchor("center"),
@@ -694,10 +671,10 @@ scene("shop", (data) => {
       "hint2"
     ]);
     hint2.onUpdate(() => {
-      hint2.text = currentCoins >= 5 ? "[2] KAUFEN" : "ZU TEUER";
+      hint2.text = currentCoins >= 5 ? "[2] КУПИТЬ" : "СЛИШКОМ ДОРОГО";
       hint2.color = currentCoins >= 5 ? rgb(100, 255, 100) : rgb(255, 100, 100);
     });
-    hint2.text = currentCoins >= 5 ? "[2] KAUFEN" : "ZU TEUER";
+    hint2.text = currentCoins >= 5 ? "[2] КУПИТЬ" : "СЛИШКОМ ДОРОГО";
     hint2.color = currentCoins >= 5 ? rgb(100, 255, 100) : rgb(255, 100, 100);
     
     // Item 3: Eisenrüstung
@@ -715,7 +692,7 @@ scene("shop", (data) => {
     });
     
     add([
-      text("🛡️ EISENRÜSTUNG", { size: 20 }),
+      text("🛡️ ЖЕЛЕЗНАЯ БРОНЯ", { size: 20 }),
       pos(width() / 2 + 400, height() / 2 - 60),
       color(180, 180, 180),
       anchor("center"),
@@ -723,7 +700,7 @@ scene("shop", (data) => {
     ]);
     
     add([
-      text("-1 Herz Schaden", { size: 16 }),
+      text("-1 сердце урона", { size: 16 }),
       pos(width() / 2 + 400, height() / 2 - 25),
       color(200, 200, 200),
       anchor("center"),
@@ -741,7 +718,7 @@ scene("shop", (data) => {
     let hint3 = null;
     if (boughtArmor) {
       hint3 = add([
-        text("✓ GEKAUFT", { size: 16 }),
+        text("✓ КУПЛЕНО", { size: 16 }),
         pos(width() / 2 + 400, height() / 2 + 50),
         color(100, 255, 100),
         anchor("center"),
@@ -758,10 +735,10 @@ scene("shop", (data) => {
         "hint3"
       ]);
       hint3.onUpdate(() => {
-        hint3.text = currentCoins >= 20 ? "[3] KAUFEN" : "ZU TEUER";
+        hint3.text = currentCoins >= 20 ? "[3] КУПИТЬ" : "СЛИШКОМ ДОРОГО";
         hint3.color = currentCoins >= 20 ? rgb(100, 255, 100) : rgb(255, 100, 100);
       });
-      hint3.text = currentCoins >= 20 ? "[3] KAUFEN" : "ZU TEUER";
+      hint3.text = currentCoins >= 20 ? "[3] КУПИТЬ" : "СЛИШКОМ ДОРОГО";
       hint3.color = currentCoins >= 20 ? rgb(100, 255, 100) : rgb(255, 100, 100);
     }
     
@@ -781,7 +758,7 @@ scene("shop", (data) => {
       });
       
       add([
-        text("⚡ ULTRA-SCHWERT ⚡", { size: 18 }),
+        text("⚡ УЛЬТРА-МЕЧ ⚡", { size: 18 }),
         pos(width() / 2 + 400, height() / 2 + 60),
         color(255, 100, 255),
         anchor("center"),
@@ -789,7 +766,7 @@ scene("shop", (data) => {
       ]);
       
       add([
-        text("17 Herzen Schaden!", { size: 14 }),
+        text("17 сердец урона!", { size: 14 }),
         pos(width() / 2 + 400, height() / 2 + 95),
         color(200, 200, 200),
         anchor("center"),
@@ -807,7 +784,7 @@ scene("shop", (data) => {
       let hint4 = null;
       if (boughtUltra) {
         hint4 = add([
-          text("✓ GEKAUFT", { size: 14 }),
+          text("✓ КУПЛЕНО", { size: 14 }),
           pos(width() / 2 + 400, height() / 2 + 160),
           color(100, 255, 100),
           anchor("center"),
@@ -824,10 +801,10 @@ scene("shop", (data) => {
           "hint4"
         ]);
         hint4.onUpdate(() => {
-          hint4.text = currentCoins >= 30 ? "[4] KAUFEN" : "ZU TEUER";
+          hint4.text = currentCoins >= 30 ? "[4] КУПИТЬ" : "СЛИШКОМ ДОРОГО";
           hint4.color = currentCoins >= 30 ? rgb(255, 100, 255) : rgb(255, 100, 100);
         });
-        hint4.text = currentCoins >= 30 ? "[4] KAUFEN" : "ZU TEUER";
+        hint4.text = currentCoins >= 30 ? "[4] КУПИТЬ" : "СЛИШКОМ ДОРОГО";
         hint4.color = currentCoins >= 30 ? rgb(255, 100, 255) : rgb(255, 100, 100);
       }
     }
@@ -842,7 +819,7 @@ scene("shop", (data) => {
         // Button aktualisieren
         hint1.destroy();
         hint1 = add([
-          text("✓ GEKAUFT", { size: 16 }),
+          text("✓ КУПЛЕНО", { size: 16 }),
           pos(width() / 2 - 400, height() / 2 + 50),
           color(100, 255, 100),
           anchor("center"),
@@ -860,7 +837,7 @@ scene("shop", (data) => {
         currentApples++;
         // Temporäre Bestätigung
         add([
-          text("✓ GEKAUFT! (mehrfach möglich)", { size: 14 }),
+          text("✓ КУПЛЕНО! (можно купить ещё)", { size: 14 }),
           pos(width() / 2, height() / 2 + 70),
           color(100, 255, 100),
           anchor("center"),
@@ -878,14 +855,14 @@ scene("shop", (data) => {
         currentCoins -= 20;
         // Button aktualisieren
         hint3.destroy();
-        hint3 = add([
-          text("✓ GEKAUFT", { size: 16 }),
-          pos(width() / 2 + 400, height() / 2 + 50),
-          color(100, 255, 100),
-          anchor("center"),
-          z(10),
-          "hint3"
-        ]);
+          hint3 = add([
+            text("✓ КУПЛЕНО", { size: 16 }),
+            pos(width() / 2 + 400, height() / 2 + 50),
+            color(100, 255, 100),
+            anchor("center"),
+            z(10),
+            "hint3"
+          ]);
       }
     });
     
@@ -900,7 +877,7 @@ scene("shop", (data) => {
           // Button aktualisieren
           hint4.destroy();
           hint4 = add([
-            text("✓ GEKAUFT", { size: 16 }),
+            text("✓ КУПЛЕНО", { size: 16 }),
             pos(width() / 2, height() / 2 + 300),
             color(100, 255, 100),
             anchor("center"),
@@ -914,7 +891,7 @@ scene("shop", (data) => {
   
   // Unten: Weiter zum Level
   add([
-    text("Drücke ENTER um zum Level zu gehen", { size: 22 }),
+    text("Нажмите ENTER чтобы перейти к уровню", { size: 22 }),
     pos(width() / 2, height() - 40),
     color(200, 200, 200),
     anchor("center"),
@@ -923,20 +900,20 @@ scene("shop", (data) => {
   
   // DEBUG: Test ob Tasteneingaben funktionieren
   const debugText = add([
-    text("Taste gedrückt: -", { size: 16 }),
+    text("Нажата клавиша: -", { size: 16 }),
     pos(10, height() - 30),
     color(255, 255, 0),
     z(100)
   ]);
   
   onKeyPress(() => {
-    debugText.text = `Taste gedrückt: ${Math.random().toFixed(2)}`;
+    debugText.text = `Нажата клавиша: ${Math.random().toFixed(2)}`;
     console.log("Irgendeine Taste wurde gedrückt!");
   });
   
   onKeyPress("enter", () => {
     console.log("ENTER wurde gedrückt im Shop!");
-    debugText.text = "ENTER gedrückt!";
+    debugText.text = "ENTER нажата!";
     go("game", {
       level: data.level,
       playerHealth: data.playerHealth,
@@ -1000,7 +977,7 @@ scene("game", (levelData) => {
   
   // Level-Anzeige oben links
   add([
-    text(`Level ${level}`, { size: 32 }),
+    text(`Уровень ${level}`, { size: 32 }),
     pos(20, 20),
     color(255, 255, 255),
     z(100)
@@ -1009,7 +986,7 @@ scene("game", (levelData) => {
   // Schwert-Upgrade-Nachricht anzeigen
   if (hasUpgradedSword) {
     add([
-      text("SCHWERT AUFGEWERTET! ⚔✨", { size: 24 }),
+      text("МЕЧ УЛУЧШЕН! ⚔✨", { size: 24 }),
       pos(width() / 2, 80),
       color(255, 215, 0),
       anchor("center"),
@@ -1018,7 +995,7 @@ scene("game", (levelData) => {
     ]);
     
     add([
-      text("(4 Herzen Schaden!)", { size: 18 }),
+      text("(4 сердца урона!)", { size: 18 }),
       pos(width() / 2, 110),
       color(255, 215, 0),
       anchor("center"),
@@ -1030,7 +1007,7 @@ scene("game", (levelData) => {
   // Boss-Warnung anzeigen
   if (level === 4) {
     add([
-      text("⚠️ BOSS-KAMPF! ⚠️", { size: 36 }),
+      text("⚠️ БОЙ С БОССОМ! ⚠️", { size: 36 }),
       pos(width() / 2, 80),
       color(255, 50, 50),
       anchor("center"),
@@ -1039,7 +1016,7 @@ scene("game", (levelData) => {
     ]);
     
     add([
-      text("Der Boss ist RIESIG und hat 50 Herzen!", { size: 18 }),
+      text("Босс ОГРОМНЫЙ и имеет 50 сердец!", { size: 18 }),
       pos(width() / 2, 120),
       color(255, 100, 100),
       anchor("center"),
@@ -1048,25 +1025,7 @@ scene("game", (levelData) => {
     ]);
   } else if (level === 7) {
     add([
-      text("⚠️ MEGA BOSS! ⚠️", { size: 42 }),
-      pos(width() / 2, 80),
-      color(255, 0, 0),
-      anchor("center"),
-      z(100),
-      lifespan(5)
-    ]);
-    
-    add([
-      text("Der Boss hat 200 Herzen! Sei vorsichtig!", { size: 20 }),
-      pos(width() / 2, 130),
-      color(255, 50, 50),
-      anchor("center"),
-      z(100),
-      lifespan(5)
-    ]);
-  } else if (level === 10) {
-    add([
-      text("⚠️ FINAL BOSS! ⚠️", { size: 48 }),
+      text("⚠️ ФИНАЛЬНЫЙ БОСС! ⚠️", { size: 48 }),
       pos(width() / 2, 60),
       color(200, 0, 0),
       anchor("center"),
@@ -1075,7 +1034,7 @@ scene("game", (levelData) => {
     ]);
     
     add([
-      text("Der FINALE BOSS hat 350 Herzen!", { size: 24 }),
+      text("У ФИНАЛЬНОГО БОССА 200 сердец!", { size: 24 }),
       pos(width() / 2, 110),
       color(255, 0, 0),
       anchor("center"),
@@ -1084,7 +1043,7 @@ scene("game", (levelData) => {
     ]);
     
     add([
-      text("Das ist dein letzter Kampf!", { size: 20 }),
+      text("Это ваш последний бой!", { size: 20 }),
       pos(width() / 2, 150),
       color(255, 100, 100),
       anchor("center"),
@@ -1325,27 +1284,8 @@ scene("game", (levelData) => {
     spawnZombie(800, 40, 2);
     spawnZombie(1000, 40, 2);
   } else if (level === 7) {
-    // Level 7: BOSS mit 200 Herzen!
+    // Level 7: FINAL BOSS mit 200 Herzen!
     spawnBoss(400, 200);
-  } else if (level === 8) {
-    // Level 8: 5 Mega-Zombies mit je 100 Herzen
-    spawnZombie(150, 100);
-    spawnZombie(350, 100);
-    spawnZombie(550, 100);
-    spawnZombie(750, 100);
-    spawnZombie(950, 100);
-  } else if (level === 9) {
-    // Level 9: 7 Ultra-Zombies mit je 150 Herzen
-    spawnZombie(100, 150);
-    spawnZombie(250, 150);
-    spawnZombie(400, 150);
-    spawnZombie(550, 150);
-    spawnZombie(700, 150);
-    spawnZombie(850, 150);
-    spawnZombie(1000, 150);
-  } else if (level === 10) {
-    // Level 10: FINAL BOSS mit 350 Herzen!
-    spawnBoss(400, 350);
   }
 
   // Schild anzeigen (wenn vorhanden)
@@ -1391,20 +1331,15 @@ scene("game", (levelData) => {
     if (player.pos.x > width() - 20) player.pos.x = width() - 20;
   });
 
-  // Angriff mit linker Maustaste
-  onMousePress("left", () => {
+  // Angriff und Essen mit L Taste
+  onKeyPress("l", () => {
     if (gameState.selectedSlot === 0 && !player.isAttacking && player.attackCooldown <= 0) {
       // Schild deaktivieren beim Angriff
       if (gameState.shieldActive) {
         gameState.shieldActive = false;
       }
       attackWithSword();
-    }
-  });
-
-  // Apfel essen mit rechter Maustaste
-  onMousePress("right", () => {
-    if (gameState.selectedSlot === 1) {
+    } else if (gameState.selectedSlot === 1) {
       eatGoldenApple();
     }
   });
@@ -1649,5 +1584,95 @@ scene("game", (levelData) => {
   });
 });
 
-// Starte das Spiel mit Level 1
-go("game", { level: 1 });
+// Steuerungs-Szene (wird am Anfang gezeigt)
+scene("controls", () => {
+  // Hintergrund
+  add([
+    rect(width(), height()),
+    pos(0, 0),
+    color(20, 30, 80),
+    z(-1)
+  ]);
+  
+  add([
+    text("🎮 УПРАВЛЕНИЕ 🎮", { size: 48 }),
+    pos(width() / 2, 80),
+    color(255, 215, 0),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  // Bewegung
+  add([
+    text("ДВИЖЕНИЕ:", { size: 32 }),
+    pos(width() / 2, 180),
+    color(100, 255, 100),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  add([
+    text("A - Влево", { size: 24 }),
+    pos(width() / 2, 230),
+    color(255, 255, 255),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  add([
+    text("D - Вправо", { size: 24 }),
+    pos(width() / 2, 270),
+    color(255, 255, 255),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  // Aktionen
+  add([
+    text("ДЕЙСТВИЯ:", { size: 32 }),
+    pos(width() / 2, 340),
+    color(100, 255, 100),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  add([
+    text("L - Атаковать мечом / Съесть яблоко", { size: 24 }),
+    pos(width() / 2, 390),
+    color(255, 255, 255),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  add([
+    text("SHIFT - Защита щитом (после уровня 4)", { size: 24 }),
+    pos(width() / 2, 430),
+    color(255, 255, 255),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  add([
+    text("1/2 - Выбрать меч или яблоко", { size: 24 }),
+    pos(width() / 2, 470),
+    color(255, 255, 255),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  // Start-Hinweis
+  add([
+    text("Нажмите ENTER чтобы начать игру", { size: 28 }),
+    pos(width() / 2, height() - 60),
+    color(100, 255, 100),
+    anchor("center"),
+    z(10)
+  ]);
+  
+  onKeyPress("enter", () => {
+    go("game", { level: 1 });
+  });
+});
+
+// Starte das Spiel mit der Steuerungs-Anzeige
+go("controls");
