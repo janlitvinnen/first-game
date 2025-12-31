@@ -18,7 +18,7 @@ const questions = [
       "14",
       "15"
     ],
-    correct: 2 // Index 2 = 14
+    correct: 1 // Index 1 = 13
   },
   {
     type: "choice", // Multiple choice question
